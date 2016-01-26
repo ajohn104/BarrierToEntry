@@ -9,7 +9,8 @@ public class WiiControls : MonoBehaviour
 {
     public GameObject saber;
 
-    private Wiimote wiimote;
+    private Wiimote wiimote0;
+    private Wiimote wiimote1;
 
     private bool foundWiimote = false;
     private bool requestedWMP = false;
@@ -48,7 +49,11 @@ public class WiiControls : MonoBehaviour
             {
                 return;
             }
-            wiimote = WiimoteManager.Wiimotes[0];
+            wiimote0 = WiimoteManager.Wiimotes[0];
+            wiimote1 = WiimoteManager.Wiimotes[1];
+            wiimote0.SendPlayerLED(false, false, false, true); // This is much more...clear. Hands wise, that is.
+            wiimote1.SendPlayerLED(true, false, false, false);
+            
             foundWiimote = true;
             return;
         }
@@ -56,13 +61,12 @@ public class WiiControls : MonoBehaviour
         int ret;
         do
         {
-            ret = wiimote.ReadWiimoteData();
-
-            if (ret > 0 && wiimote.current_ext == ExtensionController.MOTIONPLUS)
+            ret = wiimote0.ReadWiimoteData();
+            if (ret > 0 && wiimote0.current_ext == ExtensionController.MOTIONPLUS)
             {
-                Vector3 offset = new Vector3(Mathf.Round(-wiimote.MotionPlus.PitchSpeed*100f)/100f,
-                                                Mathf.Round(wiimote.MotionPlus.RollSpeed * 100f) / 100f,
-                                                Mathf.Round(-wiimote.MotionPlus.YawSpeed * 100f) / 100f) / 95f; // Divide by 95Hz (average updates per second from wiimote)
+                Vector3 offset = new Vector3(Mathf.Round(-wiimote0.MotionPlus.PitchSpeed*100f)/100f,
+                                                Mathf.Round(wiimote0.MotionPlus.RollSpeed * 100f) / 100f,
+                                                Mathf.Round(-wiimote0.MotionPlus.YawSpeed * 100f) / 100f) / 95f; // Divide by 95Hz (average updates per second from wiimote)
                 wmpoffset += offset;
                 if (allowSaber)
                 {
@@ -70,12 +74,12 @@ public class WiiControls : MonoBehaviour
                 }
                 if (calib1 && calib2 && calib3)
                 {
-                    if (wiimote.Button.b && wiimote.current_ext == ExtensionController.MOTIONPLUS && !debugPosition)
+                    if (wiimote0.Button.b && wiimote0.current_ext == ExtensionController.MOTIONPLUS && !debugPosition)
                     {
                         vel = Vector3.zero;
                     }
                     // point wiimote at screen, with wiimote "A" facing upwards, then press wiimote "B" to recalibrate position only
-                    if (wiimote.Button.d_down && wiimote.current_ext == ExtensionController.MOTIONPLUS)
+                    if (wiimote0.Button.d_down && wiimote0.current_ext == ExtensionController.MOTIONPLUS)
                     {
                         saber.transform.rotation = Quaternion.FromToRotation(saber.transform.rotation * GetAccelVector(), Vector3.up) * saber.transform.rotation;
                         saber.transform.rotation = Quaternion.FromToRotation(saber.transform.forward, Vector3.forward) * saber.transform.rotation;
@@ -93,7 +97,7 @@ public class WiiControls : MonoBehaviour
                     pressure *= 1f;
                     //Debug.Log(resistance + ", " + pressure);
 
-                    if (!(wiimote.Button.b && wiimote.current_ext == ExtensionController.MOTIONPLUS && !debugPosition))
+                    if (!(wiimote0.Button.b && wiimote0.current_ext == ExtensionController.MOTIONPLUS && !debugPosition))
                     {
                         saber.transform.localPosition += Time.deltaTime * (new Vector3(-vel[0] * 10, -vel[1] * 10, -vel[2]*2) + pressure * resistance);
                     }
@@ -107,27 +111,27 @@ public class WiiControls : MonoBehaviour
 
         if (!requestedWMP)
         {
-            wiimote.RequestIdentifyWiiMotionPlus();
+            wiimote0.RequestIdentifyWiiMotionPlus();
             requestedWMP = true;
             return;
         }
 
         if (!activatedWMP)
         {
-            wiimote.ActivateWiiMotionPlus();
+            wiimote0.ActivateWiiMotionPlus();
             activatedWMP = true;
             return;
         }
 
         if (!setupCamera)
         {
-            wiimote.SetupIRCamera(IRDataType.BASIC);
+            wiimote0.SetupIRCamera(IRDataType.BASIC);
             setupCamera = true;
             return;
         }
 
         // Face screen with Rift and press "A" to reset and calibrate the Oculus
-        if (wiimote.Button.a)
+        if (wiimote0.Button.a)
         {
             VRCenter.Recenter();
         }
@@ -150,7 +154,7 @@ public class WiiControls : MonoBehaviour
         }*/
         if(calib1 && calib2 && calib3)
         {
-            float[] acc = wiimote.Accel.GetCalibratedAccelData();
+            float[] acc = wiimote0.Accel.GetCalibratedAccelData();
             Vector3 accel = new Vector3(acc[0], acc[2], acc[1]);
             Vector3 accelG = Vector3.down;//Quaternion.Euler(saber.transform.rotation.eulerAngles-new Vector3(0, 0, 0))*Vector3.down;
             lastAccel = accel;
@@ -159,9 +163,9 @@ public class WiiControls : MonoBehaviour
         }
 
         // place wiimote on level surface, pointing at screen with wiimote "A" button up, then press keyboard "space" to reset and calibrate position and Wii Motion Plus
-        if (Input.GetKeyDown(KeyCode.Space) && wiimote.current_ext == ExtensionController.MOTIONPLUS)
+        if (Input.GetKeyDown(KeyCode.Space) && wiimote0.current_ext == ExtensionController.MOTIONPLUS)
         {
-            MotionPlusData data = wiimote.MotionPlus;
+            MotionPlusData data = wiimote0.MotionPlus;
             data.SetZeroValues();
             saber.transform.rotation = Quaternion.FromToRotation(saber.transform.rotation * GetAccelVector(), Vector3.up) * saber.transform.rotation;
             saber.transform.rotation = Quaternion.FromToRotation(saber.transform.forward, Vector3.forward) * saber.transform.rotation;
@@ -174,7 +178,7 @@ public class WiiControls : MonoBehaviour
         }
 
         // point wiimote at screen, with wiimote "A" facing upwards, then press wiimote "B" to recalibrate position only
-        if (wiimote.Button.b && wiimote.current_ext == ExtensionController.MOTIONPLUS && debugPosition)
+        if (wiimote0.Button.b && wiimote0.current_ext == ExtensionController.MOTIONPLUS && debugPosition)
         {
             saber.transform.rotation = Quaternion.FromToRotation(saber.transform.rotation * GetAccelVector(), Vector3.up) * saber.transform.rotation;
             saber.transform.rotation = Quaternion.FromToRotation(saber.transform.forward, Vector3.forward) * saber.transform.rotation;
@@ -183,19 +187,19 @@ public class WiiControls : MonoBehaviour
             wmpoffset = initOff;
         }
 
-        if (Input.GetKeyDown(KeyCode.UpArrow) && wiimote.current_ext == ExtensionController.MOTIONPLUS)
+        if (Input.GetKeyDown(KeyCode.UpArrow) && wiimote0.current_ext == ExtensionController.MOTIONPLUS)
         {
-            wiimote.Accel.CalibrateAccel(AccelCalibrationStep.A_BUTTON_UP);
+            wiimote0.Accel.CalibrateAccel(AccelCalibrationStep.A_BUTTON_UP);
             calib1 = true;
         }
-        if (Input.GetKeyDown(KeyCode.LeftArrow) && wiimote.current_ext == ExtensionController.MOTIONPLUS)
+        if (Input.GetKeyDown(KeyCode.LeftArrow) && wiimote0.current_ext == ExtensionController.MOTIONPLUS)
         {
-            wiimote.Accel.CalibrateAccel(AccelCalibrationStep.LEFT_SIDE_UP);
+            wiimote0.Accel.CalibrateAccel(AccelCalibrationStep.LEFT_SIDE_UP);
             calib2 = true;
         }
-        if (Input.GetKeyDown(KeyCode.DownArrow) && wiimote.current_ext == ExtensionController.MOTIONPLUS)
+        if (Input.GetKeyDown(KeyCode.DownArrow) && wiimote0.current_ext == ExtensionController.MOTIONPLUS)
         {
-            wiimote.Accel.CalibrateAccel(AccelCalibrationStep.EXPANSION_UP);
+            wiimote0.Accel.CalibrateAccel(AccelCalibrationStep.EXPANSION_UP);
             calib3 = true;
         }
     }
@@ -235,7 +239,7 @@ public class WiiControls : MonoBehaviour
         float accel_y;
         float accel_z;
 
-        float[] accel = wiimote.Accel.GetCalibratedAccelData();
+        float[] accel = wiimote0.Accel.GetCalibratedAccelData();
         accel_x = accel[0];
         accel_y = -accel[2];
         accel_z = accel[1];
@@ -249,7 +253,7 @@ public class WiiControls : MonoBehaviour
         float accel_y;
         float accel_z;
 
-        float[] accel = wiimote.Accel.GetCalibratedAccelData();
+        float[] accel = wiimote0.Accel.GetCalibratedAccelData();
         accel_x = accel[0];
         accel_y = -accel[2];
         accel_z = accel[1];
