@@ -95,7 +95,7 @@ public class WiiControls : MonoBehaviour
 
                     if (!(wiimote.Button.b && wiimote.current_ext == ExtensionController.MOTIONPLUS && !debugPosition))
                     {
-                        saber.transform.localPosition += Time.deltaTime * (new Vector3(-vel[0] * 10, -vel[1] * 2, -vel[2]*2) + pressure * resistance);
+                        saber.transform.localPosition += Time.deltaTime * (new Vector3(-vel[0] * 10, -vel[1] * 10, -vel[2]*2) + pressure * resistance);
                     }
                     if(Vector3.Distance(saber.transform.localPosition, initSaberOff) > 10f)
                     {
