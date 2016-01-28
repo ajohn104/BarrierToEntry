@@ -16,6 +16,7 @@ namespace BarrierToEntry
         Animator anim;
 
         public GameObject saber;
+        public Transform handGrip;
         GameObject leftObj
         {
             get
@@ -31,8 +32,13 @@ namespace BarrierToEntry
 
         private readonly Matrix4x4 scale = Matrix4x4.Scale(new Vector3(-10f, -10f, -2f));
 
-        private readonly Vector3 saberOffset = new Vector3(0.2912f, 0.8266f, -0.0023f);
-        private readonly Vector3 handOffset = new Vector3(-0.3053612f, 0.8492532f, 0.086025f);
+        private readonly Vector3 saberOffset = new Vector3(0.2912f, 0.8183469f, 0.03847433f);
+        private readonly Vector3 handOffset = new Vector3(-0.3053612f, 0.841f, 0.1267993f);
+
+        private readonly Vector3 saberTestOffset = new Vector3(0.2885624f, 1.081484f, 0.3783985f);
+        private readonly Quaternion saberTestRot = Quaternion.Euler(new Vector3(357.5609f, 171.6962f, 2.578102f));
+        private bool runTest = false;
+        // handgrip localPos: (-0.21, 0, 1.84)
 
         private Vector3 primaryOffset
         {
@@ -61,6 +67,10 @@ namespace BarrierToEntry
             manager.Start();
             manager.assignTargets(target1, target2);
             anim = GetComponent<Animator>();
+            if(runTest)
+            {
+                saber.transform.localRotation = saberTestRot;
+            }
         }
 
         void Update()
@@ -115,12 +125,140 @@ namespace BarrierToEntry
                     
                 }
             }
+            if(runTest)
+            {
+                saber.transform.localPosition = saberTestOffset;
+            }
+        }
+
+        private float _xRot = 0f;
+        private float _yRot = 0f;
+        private float _zRot = 0f;
+
+        private float xRot
+        {
+            set
+            {
+                Debug.Log("xRot: " + _xRot + " -> " + value);
+                _xRot = value;
+            }
+
+            get
+            {
+                return _xRot;
+            }
+        }
+
+        private float yRot
+        {
+            set
+            {
+                Debug.Log("yRot: " + _xRot + " -> " + value);
+                _yRot = value;
+            }
+
+            get
+            {
+                return _yRot;
+            }
+        }
+
+        private float zRot
+        {
+            set
+            {
+                Debug.Log("zRot: " + _xRot + " -> " + value);
+                _zRot = value;
+            }
+
+            get
+            {
+                return _zRot;
+            }
         }
 
         void OnAnimatorIK()
         {
+            /*
+            bool changed = false;
+            if (Input.GetKeyDown(KeyCode.Keypad7))
+            {
+                xRot += 90;
+                changed = true;
+            }
+
+            if(Input.GetKeyDown(KeyCode.Keypad4))
+            {
+                xRot = 0;
+                changed = true;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Keypad1))
+            {
+                xRot -= 90;
+                changed = true;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Keypad8))
+            {
+                yRot += 90;
+                changed = true;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Keypad5))
+            {
+                yRot = 0;
+                changed = true;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Keypad2))
+            {
+                yRot -= 90;
+                changed = true;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Keypad9))
+            {
+                zRot += 90;
+                changed = true;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Keypad6))
+            {
+                zRot = 0;
+                changed = true;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Keypad3))
+            {
+                zRot -= 90;
+                changed = true;
+            }
+
+            if (changed) Debug.Log("rotation => (" + xRot + ", " + yRot + ", " + zRot + ")");
+            */
+
+            Quaternion destRot;
+            Vector3 saberRot = saber.transform.eulerAngles;
+            //Vector3 offsetRot = new Vector3(xRot, yRot, zRot);
+            Vector3 offsetRot = new Vector3(180f, -180f, 90f);
+            Vector3 finalRot = saberRot + offsetRot;
+            finalRot.x = 90f;
+            Vector3 scaleDownVec = new Vector3(0.05f, 0.1f, 0.05f);
+            Matrix4x4 scaleDown = Matrix4x4.Scale(scaleDownVec);
+            Vector3 finalOffset = new Vector3(90f, 90f, 0f);
+            destRot = Quaternion.Euler(finalOffset + scaleDown.MultiplyVector(finalRot));
+
+            // curr handRot = (180, 0, 90)
+            // curr saberRot = (0, 180, 0)
+            // ideal offset = (180, -180, 90)
+
+            //Debug.Log(saber.transform.eulerAngles);
+
             anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1.0f);
-            anim.SetIKPosition(AvatarIKGoal.RightHand, saber.transform.Find("Grip").position);
+            anim.SetIKPosition(AvatarIKGoal.RightHand, handGrip.position);
+            anim.SetIKRotationWeight(AvatarIKGoal.RightHand, 1.0f);
+            anim.SetIKRotation(AvatarIKGoal.RightHand, destRot);//Quaternion.Euler(new Vector3(180f, -180f, 90f))); //destRot);
         }
     }
 }
