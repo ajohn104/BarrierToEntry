@@ -97,6 +97,7 @@ namespace BarrierToEntry
         {
             prevState = new ButtonState(currentState);
             int ret;
+            Vector3 totalOffset = Vector3.zero;
             do
             {
                 ret = wiimote.ReadWiimoteData();
@@ -106,6 +107,8 @@ namespace BarrierToEntry
                     Vector3 offset = new Vector3(Mathf.Round(-wiimote.MotionPlus.PitchSpeed * 100f) / 100f,
                                                     Mathf.Round(wiimote.MotionPlus.RollSpeed * 100f) / 100f,
                                                     Mathf.Round(-wiimote.MotionPlus.YawSpeed * 100f) / 100f) / 95f; // Divide by 95Hz (average updates per second from wiimote)
+                    Debug.Log("recent offset: " + offset);
+                    totalOffset += offset;
                     wmpoffset += offset;
                     if (allowTracking)
                     {
@@ -139,6 +142,7 @@ namespace BarrierToEntry
                     }
                 }
             } while (ret > 0);
+            Debug.Log("total offset: " + totalOffset);
             if (!requestedWMP)
             {
                 wiimote.RequestIdentifyWiiMotionPlus();

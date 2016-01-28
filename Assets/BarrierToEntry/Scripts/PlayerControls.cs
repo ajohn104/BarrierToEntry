@@ -17,6 +17,8 @@ namespace BarrierToEntry
 
         public GameObject saber;
         public Transform handGrip;
+        public Transform saberGrip;
+
         GameObject leftObj
         {
             get
@@ -32,7 +34,8 @@ namespace BarrierToEntry
 
         private readonly Matrix4x4 scale = Matrix4x4.Scale(new Vector3(-10f, -10f, -2f));
 
-        private readonly Vector3 saberOffset = new Vector3(0.2912f, 0.8183469f, 0.03847433f);
+        private readonly Vector3 saberHandGripOffset = new Vector3(0.3185708f, 0.9067955f, 0.03708483f);
+        private readonly Vector3 saberOffset = new Vector3(-0.0908f, 0f, -0.0538f); //new Vector3(0.2912f, 0.8183469f, 0.03847433f);
         private readonly Vector3 handOffset = new Vector3(-0.3053612f, 0.841f, 0.1267993f);
 
         private readonly Vector3 saberTestOffset = new Vector3(0.2885624f, 1.081484f, 0.3783985f);
@@ -116,8 +119,14 @@ namespace BarrierToEntry
                         //leftObj.SetActive(true);
                     }
 
-                    saber.transform.localPosition = scale.MultiplyVector(primaryController.position) + primaryOffset;
-                    saber.transform.localRotation = Quaternion.Euler(primaryController.rotation);
+                    //handGrip.localPosition = scale.MultiplyVector(primaryController.position) + saberHandGripOffset;
+
+                    Vector3 fullSaberRot = new Vector3(primaryController.rotation.x, 0, primaryController.rotation.y);
+                    Vector3 fullHandleRot = new Vector3(0, 0, primaryController.rotation.z);
+
+                    //saber.transform.localPosition = primaryOffset;
+                    saber.transform.localRotation = Quaternion.Euler(fullSaberRot);
+                    handGrip.localRotation = Quaternion.Euler(fullHandleRot);
 
                     leftObj.transform.localPosition = scale.MultiplyVector(secondaryController.position) + secondaryOffset;
                     leftObj.transform.localRotation = Quaternion.Euler(secondaryController.rotation);
@@ -246,8 +255,8 @@ namespace BarrierToEntry
             finalRot.x = 90f;
             Vector3 scaleDownVec = new Vector3(0.05f, 0.1f, 0.05f);
             Matrix4x4 scaleDown = Matrix4x4.Scale(scaleDownVec);
-            Vector3 finalOffset = new Vector3(90f, 90f, 0f);
-            destRot = Quaternion.Euler(finalOffset + scaleDown.MultiplyVector(finalRot));
+            Vector3 finalOffset = new Vector3(90f, 45f, -45f);
+            destRot = Quaternion.FromToRotation(handGrip.position, saberGrip.position); //Quaternion.Euler(finalOffset + scaleDown.MultiplyVector(finalRot));
 
             // curr handRot = (180, 0, 90)
             // curr saberRot = (0, 180, 0)
@@ -257,6 +266,7 @@ namespace BarrierToEntry
 
             anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1.0f);
             anim.SetIKPosition(AvatarIKGoal.RightHand, handGrip.position);
+
             anim.SetIKRotationWeight(AvatarIKGoal.RightHand, 1.0f);
             anim.SetIKRotation(AvatarIKGoal.RightHand, destRot);//Quaternion.Euler(new Vector3(180f, -180f, 90f))); //destRot);
         }
