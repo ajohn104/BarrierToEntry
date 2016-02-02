@@ -29,10 +29,10 @@ namespace BarrierToEntry
             {
                 return target.localEulerAngles;
             }
-            set
+            /*set
             {
                 target.localRotation = Quaternion.Euler(value);
-            }
+            }*/
         }
 
         public ButtonData buttons
@@ -44,11 +44,14 @@ namespace BarrierToEntry
         }
 
         private Vector3 velocity = Vector3.zero;
+        private int index;
 
-        public Controller(Wiimote remote, Transform trans)
+        public Controller(Wiimote remote, Transform trans, int i)
         {
             this.wiimote = remote;
             this.target = trans;
+            lastRot = target.transform.eulerAngles;
+            this.index = i;
         }
 
         public void SetLED(byte num)
@@ -93,11 +96,15 @@ namespace BarrierToEntry
             }
         }
 
+        private Vector3 lastRot;
+
         public void UpdateData()
         {
+            if (Vector3.Magnitude(target.eulerAngles - lastRot) > 10) Debug.Log("large change: " + Vector3.Magnitude(target.eulerAngles - lastRot));
+            lastRot = target.eulerAngles;
             prevState = new ButtonState(currentState);
             int ret;
-            Vector3 totalOffset = Vector3.zero;
+            Vector3 totalOffset = new Vector3(wmpoffset.x, wmpoffset.y, wmpoffset.z);
             do
             {
                 ret = wiimote.ReadWiimoteData();
@@ -107,12 +114,14 @@ namespace BarrierToEntry
                     Vector3 offset = new Vector3(Mathf.Round(-wiimote.MotionPlus.PitchSpeed * 100f) / 100f,
                                                     Mathf.Round(wiimote.MotionPlus.RollSpeed * 100f) / 100f,
                                                     Mathf.Round(-wiimote.MotionPlus.YawSpeed * 100f) / 100f) / 95f; // Divide by 95Hz (average updates per second from wiimote)
-                    Debug.Log("recent offset: " + offset);
+                    //Debug.Log("recent offset: " + offset);
                     totalOffset += offset;
                     wmpoffset += offset;
+                    //if(index == 1) Debug.Log("index: " + this.index + ", " + offset);
+                    if (Input.GetKeyDown(KeyCode.LeftControl)) Debug.Log("above meee!!!");
                     if (allowTracking)
                     {
-                        target.transform.Rotate(offset, Space.Self);
+                        target.Rotate(offset, Space.Self);
                     }
                     if (calib1 && calib2 && calib3)
                     {
@@ -142,7 +151,9 @@ namespace BarrierToEntry
                     }
                 }
             } while (ret > 0);
-            Debug.Log("total offset: " + totalOffset);
+            totalOffset -= wmpoffset;
+            //Debug.Log("total offset: " + totalOffset);
+            if(Vector3.Magnitude(totalOffset) > 1) Debug.Log("total offset: " + totalOffset);
             if (!requestedWMP)
             {
                 wiimote.RequestIdentifyWiiMotionPlus();
@@ -236,10 +247,11 @@ namespace BarrierToEntry
 
         public void ResetData()
         {
-            target.transform.rotation = Quaternion.FromToRotation(target.transform.rotation * GetAccelVector(), Vector3.up) * target.transform.rotation;
-            target.transform.rotation = Quaternion.FromToRotation(target.transform.forward, Vector3.forward) * target.transform.rotation;
-            target.transform.Rotate(new Vector3(90, 0, 0));
-            target.transform.localPosition = Vector3.zero;
+            Debug.Log("data reset");
+            target.rotation = Quaternion.FromToRotation(target.rotation * GetAccelVector(), Vector3.up) * target.rotation;
+            target.rotation = Quaternion.FromToRotation(target.forward, Vector3.forward) * target.rotation;
+            target.Rotate(new Vector3(90, 0, 0));
+            target.localPosition = Vector3.zero;
             wmpoffset = initOff;
         }
 

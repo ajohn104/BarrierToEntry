@@ -54,8 +54,8 @@ namespace BarrierToEntry
             {
                 _foundControllers = true;
                 controllers = new Controller[2];
-                controllers[0] = new Controller(WiimoteManager.Wiimotes[0], target1);
-                controllers[1] = new Controller(WiimoteManager.Wiimotes[1], target2);
+                controllers[0] = new Controller(WiimoteManager.Wiimotes[0], target1, 1);
+                controllers[1] = new Controller(WiimoteManager.Wiimotes[1], target2, 2);
 
                 controllers[0].SetLED(4); // 4th led is the rightmost light and therefore the right hand, for now.
                 controllers[1].SetLED(1); // 1st led is the leftmost light and therefore the left hand, for now.

@@ -121,8 +121,8 @@ namespace BarrierToEntry
 
                     //handGrip.localPosition = scale.MultiplyVector(primaryController.position) + saberHandGripOffset;
 
-                    Vector3 fullSaberRot = new Vector3(primaryController.rotation.x, 0, primaryController.rotation.y);
-                    Vector3 fullHandleRot = new Vector3(0, 0, primaryController.rotation.z);
+                    Vector3 fullSaberRot = new Vector3(0, 0, 0);
+                    Vector3 fullHandleRot = new Vector3(primaryController.rotation.x, primaryController.rotation.y, primaryController.rotation.z);
 
                     //saber.transform.localPosition = primaryOffset;
                     saber.transform.localRotation = Quaternion.Euler(fullSaberRot);
@@ -188,7 +188,7 @@ namespace BarrierToEntry
 
         void OnAnimatorIK()
         {
-            /*
+            
             bool changed = false;
             if (Input.GetKeyDown(KeyCode.Keypad7))
             {
@@ -245,7 +245,7 @@ namespace BarrierToEntry
             }
 
             if (changed) Debug.Log("rotation => (" + xRot + ", " + yRot + ", " + zRot + ")");
-            */
+            
 
             Quaternion destRot;
             Vector3 saberRot = saber.transform.eulerAngles;
@@ -264,11 +264,13 @@ namespace BarrierToEntry
 
             //Debug.Log(saber.transform.eulerAngles);
 
+            Quaternion rotMe = Quaternion.Euler(handGrip.localEulerAngles + new Vector3(-270f, 0, 270));//new Vector3(xRot, yRot, zRot));
+
             anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1.0f);
             anim.SetIKPosition(AvatarIKGoal.RightHand, handGrip.position);
 
             anim.SetIKRotationWeight(AvatarIKGoal.RightHand, 1.0f);
-            anim.SetIKRotation(AvatarIKGoal.RightHand, destRot);//Quaternion.Euler(new Vector3(180f, -180f, 90f))); //destRot);
+            anim.SetIKRotation(AvatarIKGoal.RightHand, rotMe);//Quaternion.Euler(new Vector3(180f, -180f, 90f))); //destRot);
         }
     }
 }
