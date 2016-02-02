@@ -264,13 +264,18 @@ namespace BarrierToEntry
 
             //Debug.Log(saber.transform.eulerAngles);
 
-            Quaternion rotMe = Quaternion.Euler(handGrip.localEulerAngles + new Vector3(-270f, 0, 270));//new Vector3(xRot, yRot, zRot));
+            Quaternion rotMe = Quaternion.Euler(handGrip.localEulerAngles + Vector3.zero);//+ new Vector3(-270f, 0, 270));//new Vector3(xRot, yRot, zRot));
+            
+
 
             anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1.0f);
             anim.SetIKPosition(AvatarIKGoal.RightHand, handGrip.position);
 
             anim.SetIKRotationWeight(AvatarIKGoal.RightHand, 1.0f);
             anim.SetIKRotation(AvatarIKGoal.RightHand, rotMe);//Quaternion.Euler(new Vector3(180f, -180f, 90f))); //destRot);
+            
         }
+
+        
     }
 }
