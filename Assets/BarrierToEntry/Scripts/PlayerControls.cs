@@ -34,14 +34,13 @@ namespace BarrierToEntry
 
         private readonly Matrix4x4 scale = Matrix4x4.Scale(new Vector3(-10f, -10f, -2f));
 
-        private readonly Vector3 saberHandGripOffset = new Vector3(0.3185708f, 0.9067955f, 0.03708483f);
+        private readonly Vector3 saberHandGripOffset = new Vector3(0.3432f, 0.9008f, 0.0357f);
         private readonly Vector3 saberOffset = new Vector3(-0.0908f, 0f, -0.0538f); //new Vector3(0.2912f, 0.8183469f, 0.03847433f);
         private readonly Vector3 handOffset = new Vector3(-0.3053612f, 0.841f, 0.1267993f);
 
         private readonly Vector3 saberTestOffset = new Vector3(0.2885624f, 1.081484f, 0.3783985f);
         private readonly Quaternion saberTestRot = Quaternion.Euler(new Vector3(357.5609f, 171.6962f, 2.578102f));
         private bool runTest = false;
-        // handgrip localPos: (-0.21, 0, 1.84)
 
         private Vector3 primaryOffset
         {
@@ -119,7 +118,7 @@ namespace BarrierToEntry
                         //leftObj.SetActive(true);
                     }
 
-                    //handGrip.localPosition = scale.MultiplyVector(primaryController.position) + saberHandGripOffset;
+                    handGrip.localPosition = scale.MultiplyVector(primaryController.position) + saberHandGripOffset;
 
                     Vector3 fullSaberRot = new Vector3(0, 0, 0);
                     Vector3 fullHandleRot = new Vector3(primaryController.rotation.x, primaryController.rotation.y, primaryController.rotation.z);
@@ -263,19 +262,41 @@ namespace BarrierToEntry
             // ideal offset = (180, -180, 90)
 
             //Debug.Log(saber.transform.eulerAngles);
+            handGrip.Rotate(new Vector3(90, 0, -90), Space.Self);
 
-            Quaternion rotMe = Quaternion.Euler(handGrip.localEulerAngles + Vector3.zero);//+ new Vector3(-270f, 0, 270));//new Vector3(xRot, yRot, zRot));
-            
+            Quaternion rotMe = Quaternion.Euler( handGrip.localEulerAngles + Vector3.zero);//+ new Vector3(-270f, 0, 270));//new Vector3(xRot, yRot, zRot));
 
+            handGrip.Rotate(new Vector3(-90, 0, 90), Space.Self);
+
+            //rotMe = Quaternion.Euler(Quaternion.Euler(new Vector3(xRot, yRot, zRot)) * handGrip.localEulerAngles);
+            //rotMe = Quaternion.Euler(handGrip.localEulerAngles + handGrip.localRotation* new Vector3(90f, 0, 270));
+            //rotMe = Quaternion.Euler(new Vector3(xRot, yRot, zRot));
+
+            //handGrip.eulerAngles = new Vector3(90, 180, 90);
 
             anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1.0f);
             anim.SetIKPosition(AvatarIKGoal.RightHand, handGrip.position);
-
+            //rotMe = Quaternion.Euler(Vector3.zero);
+            //Debug.Log(anim.GetBoneTransform(HumanBodyBones.RightHand).eulerAngles);
+            //Debug.Log("------");
+            //Debug.Log(anim.GetBoneTransform(HumanBodyBones.RightHand).eulerAngles);
             anim.SetIKRotationWeight(AvatarIKGoal.RightHand, 1.0f);
             anim.SetIKRotation(AvatarIKGoal.RightHand, rotMe);//Quaternion.Euler(new Vector3(180f, -180f, 90f))); //destRot);
-            
+            //Debug.Log(anim.GetBoneTransform(HumanBodyBones.RightHand).eulerAngles);
+
         }
 
-        
+
+        /*
+         * If:
+         * Wiimote vertical, A button facing user, saberHandGripRot = (0, 180, 0), desired handRot = (0, 0, 270), handRotReformatted = (180, 180, 90)
+         * Wiimote vertical, A button facing right of user, saberHandGripRot = (0, 90, 0), desired handRot = (0, 270, 270), handRotReformatted = (180, 90, 90)
+         * Wiimote vertical, A button facing left of user, saberHandGripRot = (0, 270, 0), desired handRot = (0, 90, 270), handRotReformatted = (180, 270, 90)
+         * Wiimote pointing directly forward from user, A button facing up, saberHandGripRot = (270, 180, 0), desired handRot = (90, 270, 180), handRotReformatted = (90, 180, 90)
+         * Wiimote pointing directly forward from user, A button facing left of user, saberHandGripRot = (0, 270, 270), desired handRot = (0, 90, 0), handRotReformatted = (0, 90, 0)
+         * Wiimote pointing directly forward from user, A button facing right of user, saberHandGripRot = (0, 90, 90), desired handRot = (0, 270, 180), handRotReformatted = (0, 270, 180)
+         *
+        */
+
     }
 }
