@@ -100,7 +100,7 @@ namespace BarrierToEntry
 
         public void UpdateData()
         {
-            if (Vector3.Magnitude(target.eulerAngles - lastRot) > 10) Debug.Log("large change: " + Vector3.Magnitude(target.eulerAngles - lastRot));
+            //if (Vector3.Magnitude(target.eulerAngles - lastRot) > 10) Debug.Log("large change: " + Vector3.Magnitude(target.eulerAngles - lastRot));
             lastRot = target.eulerAngles;
             prevState = new ButtonState(currentState);
             int ret;
@@ -118,7 +118,7 @@ namespace BarrierToEntry
                     totalOffset += offset;
                     wmpoffset += offset;
                     //if(index == 1) Debug.Log("index: " + this.index + ", " + offset);
-                    if (Input.GetKeyDown(KeyCode.LeftControl)) Debug.Log("above meee!!!");
+                    //if (Input.GetKeyDown(KeyCode.LeftControl)) Debug.Log("above meee!!!");
                     if (allowTracking)
                     {
                         target.Rotate(offset, Space.Self);
@@ -153,7 +153,7 @@ namespace BarrierToEntry
             } while (ret > 0);
             totalOffset -= wmpoffset;
             //Debug.Log("total offset: " + totalOffset);
-            if(Vector3.Magnitude(totalOffset) > 1) Debug.Log("total offset: " + totalOffset);
+            //if(Vector3.Magnitude(totalOffset) > 1) Debug.Log("total offset: " + totalOffset);
             if (!requestedWMP)
             {
                 wiimote.RequestIdentifyWiiMotionPlus();

@@ -64,6 +64,13 @@ namespace BarrierToEntry
         public Transform target1;
         public Transform target2;
 
+        private float armLength;
+        public Avatar body;
+        private HumanBodyBones[] rightArmBones = new HumanBodyBones[] {
+            HumanBodyBones.RightShoulder, HumanBodyBones.RightUpperArm,
+            HumanBodyBones.RightLowerArm, HumanBodyBones.RightHand
+        };
+
         void Start()
         {
             manager.Start();
@@ -72,6 +79,14 @@ namespace BarrierToEntry
             if(runTest)
             {
                 saber.transform.localRotation = saberTestRot;
+            }
+
+            armLength = 0f;
+            for (int i = 0; i < rightArmBones.Length - 1; i++)
+            {
+                Vector3 bone1Position = anim.GetBoneTransform(rightArmBones[i]).position;
+                Vector3 bone2Position = anim.GetBoneTransform(rightArmBones[i+1]).position;
+                armLength += Vector3.Distance(bone1Position, bone2Position);
             }
         }
 
@@ -120,6 +135,16 @@ namespace BarrierToEntry
 
                     handGrip.localPosition = scale.MultiplyVector(primaryController.position) + saberHandGripOffset;
 
+                    Vector3 rightArmPos = anim.GetBoneTransform(HumanBodyBones.RightShoulder).position;
+                    Vector3 rightArmOffset = handGrip.position - rightArmPos;
+
+                    if (rightArmOffset.magnitude > armLength)
+                    {
+                        handGrip.position = rightArmPos + (armLength / rightArmOffset.magnitude)*rightArmOffset;
+                    }
+
+
+
                     Vector3 fullSaberRot = new Vector3(0, 0, 0);
                     Vector3 fullHandleRot = new Vector3(primaryController.rotation.x, primaryController.rotation.y, primaryController.rotation.z);
 
@@ -130,7 +155,13 @@ namespace BarrierToEntry
                     leftObj.transform.localPosition = scale.MultiplyVector(secondaryController.position) + secondaryOffset;
                     leftObj.transform.localRotation = Quaternion.Euler(secondaryController.rotation);
 
-                    
+                    Vector3 leftArmPos = anim.GetBoneTransform(HumanBodyBones.LeftShoulder).position;
+                    Vector3 leftArmOffset = leftObj.transform.position - leftArmPos;
+
+                    if (leftArmOffset.magnitude > armLength)
+                    {
+                        leftObj.transform.position = leftArmPos + (armLength / leftArmOffset.magnitude) * leftArmOffset;
+                    }
                 }
             }
             if(runTest)
@@ -192,6 +223,7 @@ namespace BarrierToEntry
             if (Input.GetKeyDown(KeyCode.Keypad7))
             {
                 xRot += 90;
+                xRot %= 360;
                 changed = true;
             }
 
@@ -204,12 +236,14 @@ namespace BarrierToEntry
             if (Input.GetKeyDown(KeyCode.Keypad1))
             {
                 xRot -= 90;
+                xRot %= 360;
                 changed = true;
             }
 
             if (Input.GetKeyDown(KeyCode.Keypad8))
             {
                 yRot += 90;
+                yRot %= 360;
                 changed = true;
             }
 
@@ -222,12 +256,14 @@ namespace BarrierToEntry
             if (Input.GetKeyDown(KeyCode.Keypad2))
             {
                 yRot -= 90;
+                yRot %= 360;
                 changed = true;
             }
 
             if (Input.GetKeyDown(KeyCode.Keypad9))
             {
                 zRot += 90;
+                zRot %= 360;
                 changed = true;
             }
 
@@ -240,6 +276,7 @@ namespace BarrierToEntry
             if (Input.GetKeyDown(KeyCode.Keypad3))
             {
                 zRot -= 90;
+                zRot %= 360;
                 changed = true;
             }
 
@@ -268,6 +305,13 @@ namespace BarrierToEntry
 
             handGrip.Rotate(new Vector3(-90, 0, 90), Space.Self);
 
+
+            leftObj.transform.Rotate(new Vector3(270f, 0f, 180f), Space.Self);
+
+            Quaternion rotMe2 = Quaternion.Euler(leftObj.transform.localEulerAngles + Vector3.zero);//+ new Vector3(-270f, 0, 270));//new Vector3(xRot, yRot, zRot));
+
+            leftObj.transform.Rotate(new Vector3(-270f, 0f, -180f), Space.Self);
+
             //rotMe = Quaternion.Euler(Quaternion.Euler(new Vector3(xRot, yRot, zRot)) * handGrip.localEulerAngles);
             //rotMe = Quaternion.Euler(handGrip.localEulerAngles + handGrip.localRotation* new Vector3(90f, 0, 270));
             //rotMe = Quaternion.Euler(new Vector3(xRot, yRot, zRot));
@@ -276,6 +320,14 @@ namespace BarrierToEntry
 
             anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1.0f);
             anim.SetIKPosition(AvatarIKGoal.RightHand, handGrip.position);
+
+            anim.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1.0f);
+            anim.SetIKPosition(AvatarIKGoal.LeftHand, leftObj.transform.position);
+
+            anim.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1.0f);
+            anim.SetIKRotation(AvatarIKGoal.LeftHand, rotMe2);
+
+
             //rotMe = Quaternion.Euler(Vector3.zero);
             //Debug.Log(anim.GetBoneTransform(HumanBodyBones.RightHand).eulerAngles);
             //Debug.Log("------");
