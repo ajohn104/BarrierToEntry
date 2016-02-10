@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: 1e3bfaa4c8080a84ab11b92c542c021d
-timeCreated: 1445653981
+timeCreated: 1455066755
 licenseType: Free
 SubstanceImporter:
   serializedVersion: 5
@@ -8,10 +8,10 @@ SubstanceImporter:
   - serializedVersion: 16
     name: Electric_Liquid
     prototypeName: Electric_Liquid
-    shader: {fileID: 101, guid: 0000000000000000f000000000000000, type: 0}
-    shaderKeywords: 
+    shader: {fileID: 200, guid: 0000000000000000f000000000000000, type: 0}
+    shaderKeywords: _EMISSION
     renderQueue: 3000
-    lightmapFlags: 5
+    lightmapFlags: 1
     inputs:
     - name: $time
       value:
@@ -129,10 +129,6 @@ SubstanceImporter:
           second: .5
         data:
           first:
-            name: _Parallax
-          second: .0199999996
-        data:
-          first:
             name: _ZWrite
           second: 1
         data:
@@ -141,8 +137,16 @@ SubstanceImporter:
           second: .5
         data:
           first:
+            name: _Metallic
+          second: 0
+        data:
+          first:
             name: _BumpScale
           second: 1
+        data:
+          first:
+            name: _Parallax
+          second: .0199999996
         data:
           first:
             name: _OcclusionStrength
@@ -161,17 +165,25 @@ SubstanceImporter:
           second: 0
         data:
           first:
-            name: _Metallic
-          second: 0
+            name: _InvFade
+          second: 1
       colors:
         data:
           first:
             name: _EmissionColor
-          second: {r: 0, g: 0, b: 0, a: 1}
+          second: {r: 1, g: 1, b: 1, a: 1}
         data:
           first:
             name: _Color
           second: {r: 1, g: 1, b: 1, a: 1}
+        data:
+          first:
+            name: _TintColor
+          second: {r: .5, g: .5, b: .5, a: .5}
+        data:
+          first:
+            name: _EmisColor
+          second: {r: .200000003, g: .200000003, b: .200000003, a: 0}
     textureParameters:
     - name: Electric_Liquid_Emissive
       alphaSource: 0

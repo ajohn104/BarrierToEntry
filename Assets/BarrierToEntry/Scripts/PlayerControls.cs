@@ -65,7 +65,6 @@ namespace BarrierToEntry
         public Transform target2;
 
         private float armLength;
-        public Avatar body;
         private HumanBodyBones[] rightArmBones = new HumanBodyBones[] {
             HumanBodyBones.RightShoulder, HumanBodyBones.RightUpperArm,
             HumanBodyBones.RightLowerArm, HumanBodyBones.RightHand
