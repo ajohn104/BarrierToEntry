@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- VID 0x2085 = 8325 decimal.  PID 0x3000 = 12288 decimal. -->
+    <usb-device vendor-id="8325" product-id="12288" />  <!-- STEM Base Dongle -->
+
+    <!-- VID 0x0403 = 1027 decimal.  PID 0x6015 = 24597 decimal. -->
+    <usb-device vendor-id="1027" product-id="24597" />  <!-- STEM CDC Device -->
+
+    <!-- VID 0x2085 = 8325 decimal.  PID 0x3007 = 12295 decimal. -->
+    <usb-device vendor-id="8325" product-id="12295" />  <!-- STEM HID Device -->
+</resources>
+<!-- From: file:/F:/dev/git/sixensesdk/android/Unity3DDriver/unity3ddriver/src/main/res/xml/device_filter.xml -->

@@ -5,6 +5,7 @@ using System.Text;
 using WiimoteApi;
 using Coliseo;
 using BarrierToEntry;
+using SixenseCore;
 
 namespace BarrierToEntry
 {
@@ -91,6 +92,9 @@ namespace BarrierToEntry
 
         void Update()
         {
+            // SixenseCore.Device.GetTrackerByIndex(0).Position             // <-- this is key!
+            // SixenseCore.Device.GetTrackerByIndex(0).MagneticFrequency    // <-- use this to tell controllers apart?
+            // SixenseCore.Device.GetTrackerByIndex(0).Connected            // <-- probably also helpful
             manager.Update();
             if (manager.foundControllers)
             {
