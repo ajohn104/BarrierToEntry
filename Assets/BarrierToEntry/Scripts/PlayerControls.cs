@@ -14,27 +14,23 @@ namespace BarrierToEntry
         private ControlManager manager = new ControlManager();
         private Controller primaryController;
         private Controller secondaryController;
-        
 
         public GameObject saber;
         public Transform hand;
         public Transform handGrip;
         public Transform saberGrip;
-        
         public Animator anim;
-
         public Transform target1;
         public Transform target2;
 
         private readonly Matrix4x4 scale = Matrix4x4.Scale(new Vector3(-10f, -10f, -2f));
-
         private readonly Vector3 saberHandGripOffset = new Vector3(0.3432f, 0.9008f, 0.0357f);
         private readonly Vector3 handOffset = new Vector3(-0.3053612f, 0.841f, 0.1267993f);
-
+        private readonly Vector3 handGripIKOffset = new Vector3(0, -90, -90);
+        private readonly Vector3 handIKOffset = new Vector3(-90, 180, 0);
         
-
         private float armLength = 0f;
-        private HumanBodyBones[] rightArmBones = new HumanBodyBones[] {
+        private readonly HumanBodyBones[] rightArmBones = new HumanBodyBones[] {
             HumanBodyBones.RightUpperArm,
             HumanBodyBones.RightLowerArm,
             HumanBodyBones.RightHand
@@ -221,13 +217,15 @@ namespace BarrierToEntry
             if (changed) Debug.Log("rotation => (" + xRot + ", " + yRot + ", " + zRot + ")");
 
 
-            handGrip.Rotate(new Vector3(90, 0, -90), Space.Self);
-            Quaternion rotPrimary = Quaternion.Euler( handGrip.localEulerAngles + Vector3.zero);
-            handGrip.Rotate(new Vector3(-90, 0, 90), Space.Self);
-            
-            hand.Rotate(new Vector3(270f, 0f, 180f), Space.Self);
-            Quaternion rotSecondary = Quaternion.Euler(hand.localEulerAngles);
-            hand.Rotate(new Vector3(-270f, 0f, -180f), Space.Self);
+            Quaternion rotBefore = handGrip.rotation;
+            handGrip.Rotate(handGripIKOffset, Space.Self);
+            Quaternion rotPrimary = handGrip.localRotation;
+            handGrip.rotation = rotBefore;
+
+            rotBefore = hand.rotation;
+            hand.Rotate(handIKOffset, Space.Self);
+            Quaternion rotSecondary = hand.localRotation;
+            hand.rotation = rotBefore;
             
             anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1.0f);
             anim.SetIKPosition(AvatarIKGoal.RightHand, handGrip.position);
