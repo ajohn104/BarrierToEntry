@@ -22,6 +22,7 @@ namespace BarrierToEntry
         public Animator anim;
         public Transform target1;
         public Transform target2;
+        public Rigidbody rb;
 
         private readonly Matrix4x4 scale = Matrix4x4.Scale(new Vector3(-10f, -10f, -2f));
         private readonly Vector3 saberHandGripOffset = new Vector3(0.3432f, 0.9008f, 0.0357f);
@@ -47,6 +48,8 @@ namespace BarrierToEntry
                 Vector3 bone2Position = anim.GetBoneTransform(rightArmBones[i+1]).position;
                 armLength += Vector3.Distance(bone1Position, bone2Position);
             }
+
+            
         }
 
         void Update()
@@ -77,6 +80,39 @@ namespace BarrierToEntry
                     {
                         Debug.Log("Secondary Controller battery level: " + secondaryController.getBattery());
                     }
+
+                    // I fully intend on improving this animation stuff later, but I'd rather wait until I know any limitations/advantages of the final controller
+                    anim.SetBool("RunForward", primaryController.getButton(Controller.Button.D_UP));
+                    if(primaryController.getButton(Controller.Button.D_UP))
+                    {
+                        Vector3 movement = new Vector3(0f, 0f, 1f);
+
+                        // Make movement vector proportional to the speed per second.
+                        movement *= /*moveSpeed*/6 * Time.deltaTime;
+
+                        // Move the player to it's current position plus the movement.
+                        rb.MovePosition(transform.position + transform.rotation * movement);
+                    }
+
+                    anim.SetBool("TurnLeft", primaryController.getButton(Controller.Button.D_LEFT));
+                    if (primaryController.getButton(Controller.Button.D_LEFT))
+                    {
+                        Vector3 vec = new Vector3(0f, -100f, 0f);
+                        Quaternion deltaRotation = Quaternion.Euler(vec * Time.deltaTime + transform.rotation.eulerAngles);
+                        rb.AddRelativeTorque(vec * rb.mass / 2);
+                        transform.rotation = deltaRotation;
+                    }
+
+                    anim.SetBool("TurnRight", primaryController.getButton(Controller.Button.D_RIGHT));
+                    if (primaryController.getButton(Controller.Button.D_RIGHT))
+                    {
+                        Vector3 vec = new Vector3(0f, 100f, 0f);
+                        Quaternion deltaRotation = Quaternion.Euler(vec * Time.deltaTime + transform.rotation.eulerAngles);
+                        rb.AddRelativeTorque(vec * rb.mass / 2);
+                        transform.rotation = deltaRotation;
+                    }
+
+
 
                     handGrip.localPosition = scale.MultiplyVector(primaryController.position) + saberHandGripOffset;
 
@@ -219,24 +255,24 @@ namespace BarrierToEntry
 
             Quaternion rotBefore = handGrip.rotation;
             handGrip.Rotate(handGripIKOffset, Space.Self);
-            Quaternion rotPrimary = handGrip.localRotation;
+            Quaternion rotPrimary = handGrip.rotation;
             handGrip.rotation = rotBefore;
 
             rotBefore = hand.rotation;
             hand.Rotate(handIKOffset, Space.Self);
-            Quaternion rotSecondary = hand.localRotation;
+            Quaternion rotSecondary = hand.rotation;
             hand.rotation = rotBefore;
-            
+
+
+
             anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1.0f);
-            anim.SetIKPosition(AvatarIKGoal.RightHand, handGrip.position);
-
             anim.SetIKRotationWeight(AvatarIKGoal.RightHand, 1.0f);
-            anim.SetIKRotation(AvatarIKGoal.RightHand, rotPrimary);
-
             anim.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1.0f);
-            anim.SetIKPosition(AvatarIKGoal.LeftHand, hand.position);
-
             anim.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1.0f);
+
+            anim.SetIKPosition(AvatarIKGoal.RightHand, handGrip.position);
+            anim.SetIKRotation(AvatarIKGoal.RightHand, rotPrimary);
+            anim.SetIKPosition(AvatarIKGoal.LeftHand, hand.position);
             anim.SetIKRotation(AvatarIKGoal.LeftHand, rotSecondary);
 
         }
