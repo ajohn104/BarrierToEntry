@@ -2,7 +2,6 @@
 using UnityEngine.UI;
 using System.Collections;
 using System.Text;
-using WiimoteApi;
 using Coliseo;
 using BarrierToEntry;
 using SixenseCore;
@@ -11,24 +10,20 @@ namespace BarrierToEntry
 {
     public class PlayerControls : MonoBehaviour
     {
-        private ControlManager manager = new ControlManager();
-        private Controller primaryController;
-        private Controller secondaryController;
-
         public GameObject saber;
         public Transform hand;
         public Transform handGrip;
-        public Transform saberGrip;
         public Animator anim;
-        public Transform target1;
-        public Transform target2;
         public Rigidbody rb;
+        
+        private readonly Vector3 saberHandGripRotOffset = new Vector3(-90, 180, 0);
+        private readonly Vector3 handRotOffset = new Vector3(0, 180, 0);
 
-        private readonly Matrix4x4 scale = Matrix4x4.Scale(new Vector3(-10f, -10f, -2f));
-        private readonly Vector3 saberHandGripOffset = new Vector3(0.3432f, 0.9008f, 0.0357f);
-        private readonly Vector3 handOffset = new Vector3(-0.3053612f, 0.841f, 0.1267993f);
-        private readonly Vector3 handGripIKOffset = new Vector3(0, -90, -90);
+        private readonly Vector3 handGripIKOffset = new Vector3(0, -180, -90);
         private readonly Vector3 handIKOffset = new Vector3(-90, 180, 0);
+
+        private Vector3 leftCalibOffset = Vector3.zero;
+        private Vector3 rightCalibOffset = Vector3.zero;
         
         private float armLength = 0f;
         private readonly HumanBodyBones[] rightArmBones = new HumanBodyBones[] {
@@ -37,222 +32,172 @@ namespace BarrierToEntry
             HumanBodyBones.RightHand
         };
 
+        private Vector3 realLeftShoulderPos = Vector3.zero;
+        private Vector3 realRightShoulderPos = Vector3.zero;
+
+        private float handDist = 0;
+
+        private Tracker controllerLeft;
+        private Tracker controllerRight;
+
+        public Device device;
+
         void Start()
         {
-            manager.Start();
-            manager.assignTargets(target1, target2);
-            
+            GenerateArmLength();
+        }
+
+        private bool InputCheck()
+        {
+            if(!SixenseCore.Device.BaseConnected)
+            {
+                return false;
+            }
+            controllerLeft = SixenseCore.Device.GetTrackerByIndex(0);
+            controllerRight = SixenseCore.Device.GetTrackerByIndex(1);
+            return controllerLeft != null && controllerRight != null;
+        }
+
+        private void GenerateArmLength()
+        {
             for (int i = 0; i < rightArmBones.Length - 1; i++)
             {
                 Vector3 bone1Position = anim.GetBoneTransform(rightArmBones[i]).position;
-                Vector3 bone2Position = anim.GetBoneTransform(rightArmBones[i+1]).position;
+                Vector3 bone2Position = anim.GetBoneTransform(rightArmBones[i + 1]).position;
                 armLength += Vector3.Distance(bone1Position, bone2Position);
             }
+        }
 
-            
+        private void GenerateHandSize()
+        {
+            handDist = Vector3.Distance(anim.GetBoneTransform(HumanBodyBones.RightHand).position, anim.GetBoneTransform(HumanBodyBones.RightMiddleProximal).position);
+        }
+
+        private Vector3 GetRealPosition(Tracker con)
+        {
+            return con.Position * device.m_worldUnitScaleInMillimeters;
+        }
+
+        // This will be position calibration, and the user will press their hands to the front of their shoulders.
+        private void CalibrateShoulderPositions()
+        {
+            if (!InputCheck()) return;
+
+            Transform spine = anim.GetBoneTransform(HumanBodyBones.Spine);
+            Transform rightArm = anim.GetBoneTransform(HumanBodyBones.RightUpperArm);
+            Transform leftArm = anim.GetBoneTransform(HumanBodyBones.LeftUpperArm);
+
+            Vector3 bodyOffsetRight = spine.forward * handDist - anim.transform.position;
+            Vector3 bodyOffsetLeft = spine.forward * handDist - anim.transform.position;
+
+            rightCalibOffset = rightArm.position + bodyOffsetRight - controllerRight.Position;
+            leftCalibOffset = leftArm.position + bodyOffsetLeft - controllerLeft.Position;
+
+            realLeftShoulderPos = GetRealPosition(controllerLeft);
+            realRightShoulderPos = GetRealPosition(controllerRight);
+        }
+
+        // In this test, the user must fully extend their arms in any direction, and the system will 
+        // calculate their arm length based off the current calibration offsets. This will be used to 
+        // greatly improve the accuracy of relative world-game position tracking.
+        public void CalibrateUserArmLength()
+        {
+            // In millimeters, I guess.
+            float realRightArmLength = Vector3.Distance(GetRealPosition(controllerRight), realRightShoulderPos);
+            float realLeftArmLength = Vector3.Distance(GetRealPosition(controllerLeft), realLeftShoulderPos);
+
+            Debug.Log("Right arm: " + realRightArmLength + "mm long");
+            Debug.Log("Left arm: " + realLeftArmLength + "mm long");
+            Debug.Log("Character arm length: " + armLength + " units long");
+            float averageRealArmLength = (realRightArmLength + realLeftArmLength) / 2f;
+            device.m_worldUnitScaleInMillimeters = averageRealArmLength / armLength;
+            Debug.Log("Proper world-game scale: " + device.m_worldUnitScaleInMillimeters);
+            Debug.Log("------------");
         }
 
         void Update()
         {
-            // SixenseCore.Device.GetTrackerByIndex(0).Position             // <-- this is key!
-            // SixenseCore.Device.GetTrackerByIndex(0).MagneticFrequency    // <-- use this to tell controllers apart?
-            // SixenseCore.Device.GetTrackerByIndex(0).Connected            // <-- probably also helpful
-            manager.Update();
-            if (manager.foundControllers)
+            if(!InputCheck()) return;
+
+            // Face screen with Rift and press "A" on the primary controller (currently primary is always in your right hand) to reset and calibrate the Oculus
+            if (VRCenter.VREnabled && controllerRight.GetButtonDown(Buttons.START))
             {
-                primaryController = primaryController ?? manager.controllers[0];
-                secondaryController = secondaryController ?? manager.controllers[1];
+                VRCenter.Recenter();
+            }
 
-                // Face screen with Rift and press "A" on the primary controller (currently primary is always in your right hand) to reset and calibrate the Oculus
-                if (VRCenter.VREnabled && primaryController.buttons.a)
-                {
-                    VRCenter.Recenter();
-                }
+            if(controllerLeft.GetButton(Buttons.BUMPER) && controllerRight.GetButton(Buttons.BUMPER))
+            {
+                CalibrateShoulderPositions();
+            }
 
-                if (manager.allowInput)
-                {
-                    if (primaryController.getButtonDown(Controller.Button.HOME))
-                    {
-                        Debug.Log("Primary Controller battery level: " + primaryController.getBattery());
-                    }
+            if (controllerLeft.GetButton(Buttons.JOYSTICK) && controllerRight.GetButton(Buttons.JOYSTICK))
+            {
+                CalibrateUserArmLength();
+            }
 
-                    if (secondaryController.getButtonDown(Controller.Button.HOME))
-                    {
-                        Debug.Log("Secondary Controller battery level: " + secondaryController.getBattery());
-                    }
+            // I fully intend on improving this animation stuff later, but I'm focusing on integrating the hand tracking first
+            /*anim.SetBool("RunForward", primaryController.getButton(Controller.Button.D_UP));
+            if(primaryController.getButton(Controller.Button.D_UP))
+            {
+                Vector3 movement = new Vector3(0f, 0f, 1f);
 
-                    // I fully intend on improving this animation stuff later, but I'd rather wait until I know any limitations/advantages of the final controller
-                    anim.SetBool("RunForward", primaryController.getButton(Controller.Button.D_UP));
-                    if(primaryController.getButton(Controller.Button.D_UP))
-                    {
-                        Vector3 movement = new Vector3(0f, 0f, 1f);
+                // Make movement vector proportional to the speed per second.
+                movement *= 6 * Time.deltaTime;
 
-                        // Make movement vector proportional to the speed per second.
-                        movement *= /*moveSpeed*/6 * Time.deltaTime;
+                // Move the player to it's current position plus the movement.
+                rb.MovePosition(transform.position + transform.rotation * movement);
+            }
 
-                        // Move the player to it's current position plus the movement.
-                        rb.MovePosition(transform.position + transform.rotation * movement);
-                    }
+            anim.SetBool("TurnLeft", primaryController.getButton(Controller.Button.D_LEFT));
+            if (primaryController.getButton(Controller.Button.D_LEFT))
+            {
+                Vector3 vec = new Vector3(0f, -100f, 0f);
+                Quaternion deltaRotation = Quaternion.Euler(vec * Time.deltaTime + transform.rotation.eulerAngles);
+                rb.AddRelativeTorque(vec * rb.mass / 2);
+                transform.rotation = deltaRotation;
+            }
 
-                    anim.SetBool("TurnLeft", primaryController.getButton(Controller.Button.D_LEFT));
-                    if (primaryController.getButton(Controller.Button.D_LEFT))
-                    {
-                        Vector3 vec = new Vector3(0f, -100f, 0f);
-                        Quaternion deltaRotation = Quaternion.Euler(vec * Time.deltaTime + transform.rotation.eulerAngles);
-                        rb.AddRelativeTorque(vec * rb.mass / 2);
-                        transform.rotation = deltaRotation;
-                    }
+            anim.SetBool("TurnRight", primaryController.getButton(Controller.Button.D_RIGHT));
+            if (primaryController.getButton(Controller.Button.D_RIGHT))
+            {
+                Vector3 vec = new Vector3(0f, 100f, 0f);
+                Quaternion deltaRotation = Quaternion.Euler(vec * Time.deltaTime + transform.rotation.eulerAngles);
+                rb.AddRelativeTorque(vec * rb.mass / 2);
+                transform.rotation = deltaRotation;
+            }
+            */
 
-                    anim.SetBool("TurnRight", primaryController.getButton(Controller.Button.D_RIGHT));
-                    if (primaryController.getButton(Controller.Button.D_RIGHT))
-                    {
-                        Vector3 vec = new Vector3(0f, 100f, 0f);
-                        Quaternion deltaRotation = Quaternion.Euler(vec * Time.deltaTime + transform.rotation.eulerAngles);
-                        rb.AddRelativeTorque(vec * rb.mass / 2);
-                        transform.rotation = deltaRotation;
-                    }
+            handGrip.localPosition = controllerRight.Position;
+            handGrip.localPosition += rightCalibOffset;
 
+            Vector3 rightArmPos = anim.GetBoneTransform(HumanBodyBones.RightUpperArm).position;
+            Vector3 rightArmOffset = handGrip.position - rightArmPos;
 
-
-                    handGrip.localPosition = scale.MultiplyVector(primaryController.position) + saberHandGripOffset;
-
-                    Vector3 rightArmPos = anim.GetBoneTransform(HumanBodyBones.RightUpperArm).position;
-                    Vector3 rightArmOffset = handGrip.position - rightArmPos;
-
-                    if (rightArmOffset.magnitude > armLength)
-                    {
-                        handGrip.position = rightArmPos + (armLength / rightArmOffset.magnitude)*rightArmOffset;
-                    }
+            if (rightArmOffset.magnitude > armLength)
+            {
+                handGrip.position = rightArmPos + (armLength / rightArmOffset.magnitude)*rightArmOffset;
+            }
                     
-                    handGrip.localRotation = Quaternion.Euler(primaryController.rotation);
+            handGrip.localRotation = controllerRight.Rotation;
+            handGrip.Rotate(saberHandGripRotOffset);
 
-                    hand.localPosition = scale.MultiplyVector(secondaryController.position) + handOffset;
-                    hand.localRotation = Quaternion.Euler(secondaryController.rotation);
+            hand.localPosition = controllerLeft.Position;
+            hand.localPosition += leftCalibOffset;
 
-                    Vector3 leftArmPos = anim.GetBoneTransform(HumanBodyBones.LeftUpperArm).position;
-                    Vector3 leftArmOffset = hand.position - leftArmPos;
+            Vector3 leftArmPos = anim.GetBoneTransform(HumanBodyBones.LeftUpperArm).position;
+            Vector3 leftArmOffset = hand.position - leftArmPos;
 
-                    if (leftArmOffset.magnitude > armLength)
-                    {
-                        hand.position = leftArmPos + (armLength / leftArmOffset.magnitude) * leftArmOffset;
-                    }
-                }
-            }
-        }
-
-        private float _xRot = 0f;
-        private float _yRot = 0f;
-        private float _zRot = 0f;
-
-        private float xRot
-        {
-            set
+            if (leftArmOffset.magnitude > armLength)
             {
-                Debug.Log("xRot: " + _xRot + " -> " + value);
-                _xRot = value;
+                hand.position = leftArmPos + (armLength / leftArmOffset.magnitude) * leftArmOffset;
             }
 
-            get
-            {
-                return _xRot;
-            }
-        }
-
-        private float yRot
-        {
-            set
-            {
-                Debug.Log("yRot: " + _xRot + " -> " + value);
-                _yRot = value;
-            }
-
-            get
-            {
-                return _yRot;
-            }
-        }
-
-        private float zRot
-        {
-            set
-            {
-                Debug.Log("zRot: " + _xRot + " -> " + value);
-                _zRot = value;
-            }
-
-            get
-            {
-                return _zRot;
-            }
+            hand.localRotation = controllerLeft.Rotation;
+            hand.Rotate(handRotOffset);
         }
 
         void OnAnimatorIK()
         {
-            
-            bool changed = false;
-            if (Input.GetKeyDown(KeyCode.Keypad7))
-            {
-                xRot += 90;
-                xRot %= 360;
-                changed = true;
-            }
-
-            if(Input.GetKeyDown(KeyCode.Keypad4))
-            {
-                xRot = 0;
-                changed = true;
-            }
-
-            if (Input.GetKeyDown(KeyCode.Keypad1))
-            {
-                xRot -= 90;
-                xRot %= 360;
-                changed = true;
-            }
-
-            if (Input.GetKeyDown(KeyCode.Keypad8))
-            {
-                yRot += 90;
-                yRot %= 360;
-                changed = true;
-            }
-
-            if (Input.GetKeyDown(KeyCode.Keypad5))
-            {
-                yRot = 0;
-                changed = true;
-            }
-
-            if (Input.GetKeyDown(KeyCode.Keypad2))
-            {
-                yRot -= 90;
-                yRot %= 360;
-                changed = true;
-            }
-
-            if (Input.GetKeyDown(KeyCode.Keypad9))
-            {
-                zRot += 90;
-                zRot %= 360;
-                changed = true;
-            }
-
-            if (Input.GetKeyDown(KeyCode.Keypad6))
-            {
-                zRot = 0;
-                changed = true;
-            }
-
-            if (Input.GetKeyDown(KeyCode.Keypad3))
-            {
-                zRot -= 90;
-                zRot %= 360;
-                changed = true;
-            }
-
-            if (changed) Debug.Log("rotation => (" + xRot + ", " + yRot + ", " + zRot + ")");
-
-
             Quaternion rotBefore = handGrip.rotation;
             handGrip.Rotate(handGripIKOffset, Space.Self);
             Quaternion rotPrimary = handGrip.rotation;
@@ -262,9 +207,7 @@ namespace BarrierToEntry
             hand.Rotate(handIKOffset, Space.Self);
             Quaternion rotSecondary = hand.rotation;
             hand.rotation = rotBefore;
-
-
-
+            
             anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1.0f);
             anim.SetIKRotationWeight(AvatarIKGoal.RightHand, 1.0f);
             anim.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1.0f);
@@ -274,7 +217,6 @@ namespace BarrierToEntry
             anim.SetIKRotation(AvatarIKGoal.RightHand, rotPrimary);
             anim.SetIKPosition(AvatarIKGoal.LeftHand, hand.position);
             anim.SetIKRotation(AvatarIKGoal.LeftHand, rotSecondary);
-
         }
     }
 }

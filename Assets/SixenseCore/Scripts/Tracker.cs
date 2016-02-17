@@ -27,7 +27,7 @@ namespace SixenseCore
         /// <summary>
         /// The tracker enabled state.
         /// </summary>
-        public bool Enabled { get { return m_Connected && m_Enabled; } }
+        public bool Enabled {  get { /*Debug.Log(m_Enabled); */return m_Connected && m_Enabled; } }
 
         /// <summary>
         /// Hardware model identifier
@@ -362,6 +362,7 @@ namespace SixenseCore
         {
             if (m_Index >= 0)
             {
+                Debug.Log("here");
                 m_Enabled = false;
                 Plugin.sxCorePowerOffDevice((uint)m_Index);
             }
@@ -417,7 +418,7 @@ namespace SixenseCore
             m_batteryVoltage = info.battery_voltage;
 
             m_hasInfo = (m_HardwareType != Hardware.NONE);
-
+            
             if (m_hasInfo)
                 m_Connected = true;
         }
@@ -427,21 +428,23 @@ namespace SixenseCore
             float scale = 0.001f;
             if (m_device != null)
                 scale = 1.0f / m_device.m_worldUnitScaleInMillimeters;
-
+            
             if (data.tracked_device_index != m_Index)
             {
+                //Debug.Log("yo: " + m_Connected);
                 m_hasInfo = false;
                 m_Connected = false;
             }
-
+            
             // m_Index = data.tracked_device_index;
             m_SequenceNumber = data.sequence_number;
             m_Time = data.packet_time;
-            m_TrackerID = (TrackerID)data.tracker_id;
+            m_TrackerID = (m_Index == 0)?TrackerID.CONTROLLER_LEFT:TrackerID.CONTROLLER_RIGHT;//(TrackerID)data.tracker_id; // ***altered***
             m_batteryPercentage = data.battery_percent;
             m_gain = data.dsp_gain;
 
-            m_Enabled = GetFlag(data.status, Status.ENABLED);
+            
+            m_Enabled = true;//GetFlag(data.status, Status.ENABLED); // ***altered***
             m_Docked = GetFlag(data.status, Status.DOCKED);
             m_powered = GetFlag(data.status, Status.HAS_EXTERNAL_POWER);
             m_charging = GetFlag(data.status, Status.BATTERY_CHARGING);
@@ -453,15 +456,17 @@ namespace SixenseCore
             m_Trigger = data.trigger;
             m_JoystickX = data.joystick_x;
             m_JoystickY = data.joystick_y;
-
+            //Debug.Log("yo: " + data.tracker_pos[0]);
             m_Position.Set(data.tracker_pos[0] * scale, data.tracker_pos[1] * scale, -data.tracker_pos[2] * scale);
             m_Rotation.Set(data.tracker_rot_quat[0], data.tracker_rot_quat[1], -data.tracker_rot_quat[2], -data.tracker_rot_quat[3]);
 
             if (data.imu_gravity[0] != 0 && data.imu_gravity[1] != 0 && data.imu_gravity[2] != 0)
                 m_Gravity.Set(data.imu_gravity[0], data.imu_gravity[1], -data.imu_gravity[2]);
 
+            //Debug.Log("yo: " + m_Connected);
             if (!m_hasInfo)
             {
+                //Debug.Log("updating");
                 UpdateInfo();
             }
         }
@@ -471,6 +476,7 @@ namespace SixenseCore
         /// </summary>
         public void FixedUpdate()
         {
+            //Debug.Log("trying to process");
             if (m_Index < 0)
                 return;
 
@@ -513,7 +519,7 @@ namespace SixenseCore
             }
 
             var data = m_pastData[m_pastDataCursor--];
-
+            //Debug.Log("about to process");
             ProcessData(data);
         }
 
@@ -555,9 +561,9 @@ namespace SixenseCore
                 return;
 
             UpdateVibration();
-
+            
             m_Connected = (Plugin.sxCoreIsTrackedDeviceConnected((uint)m_Index) != 0);
-
+            //Debug.Log("yo: " + m_Connected + ", index: " + m_Index);
             if (!m_Connected)
             {
                 m_hasInfo = false;

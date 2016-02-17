@@ -64,26 +64,34 @@ namespace SixenseCore
 
         void UpdateVisual()
         {
+            
             SixenseCore.System ourSystem = SixenseCore.Device.SystemType;
             bool isValid = (SixenseCore.Device.BaseConnected && SixenseCore.Device.SystemType == m_systemType);
-
+            
             for (int i = 0; i < m_trackers.Length; i++)
             {
+                
                 var c = Device.GetTrackerByIndex(i);
+                
                 if (!c.Enabled || !isValid)
                 {
+                    
                     if (m_trackers[i] != null)
                     {
+
                         Destroy(m_trackers[i].gameObject);
                     }
+                    
                     continue;
                 }
-
+                
                 if (m_trackers[i] == null && isValid)
                 {
                     int index = -1;
-                    for(int j=0; j<m_trackerPrefabs.Length;j++)
+                    
+                    for (int j=0; j<m_trackerPrefabs.Length;j++)
                     {
+                        
                         if (m_trackerPrefabs[j] == null)
                             continue;
 
@@ -127,8 +135,8 @@ namespace SixenseCore
 
                     m_trackers[i].transform.position = m_emitter.TransformPoint(c.Position) - pos;
                 }
-
-                if(m_sceneTrackers.ContainsKey(c.ID))
+                Debug.Log(c.ID);
+                if (m_sceneTrackers.ContainsKey(c.ID))
                 {
                     var t = m_sceneTrackers[c.ID];
 
@@ -146,7 +154,7 @@ namespace SixenseCore
                         var pos = sensor.position - root.position;
 
                         root.position = m_emitter.TransformPoint(c.Position) - pos;
-
+                        
                         t.Input = c;
                     }
                     else

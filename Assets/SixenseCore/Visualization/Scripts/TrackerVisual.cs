@@ -42,6 +42,7 @@ namespace SixenseCore
         {
             get
             {
+                
                 if (m_controller != null)
                     return m_controller;
 
@@ -55,7 +56,8 @@ namespace SixenseCore
 
         public bool HasInput
         {
-            get { return m_controller != null && m_controller.Connected; }
+            
+            get { /*Debug.Log(m_controller);*/ return m_controller != null && m_controller.Connected; }
         }
         #endregion
 

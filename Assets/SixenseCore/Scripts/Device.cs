@@ -320,12 +320,14 @@ namespace SixenseCore
         /// </summary>
         public static Tracker GetTrackerByIndex(int index)
         {
+            
             if (!ms_initialized)
                 return null;
-
+            
             if (index >= ms_maxTrackers || index < 0)
                 return null;
-
+            //Debug.Log("yoyo");
+            //Debug.Log("!init: " + ms_Trackers[index].Enabled);
             return ms_Trackers[index];
         }
 
@@ -457,6 +459,7 @@ namespace SixenseCore
         {
             if (m_fixedUpdate)
             {
+                Debug.Log("Fixxxed update");
                 m_fixedTime = Time.fixedDeltaTime;
 
                 Time.fixedDeltaTime = 1.0f / 240 - Mathf.Epsilon;
@@ -529,9 +532,10 @@ namespace SixenseCore
         /// </summary>
         void FixedUpdate()
         {
+            //Debug.Log("m_fixedUpdate: " + m_fixedUpdate + ", ms_initialized: " + ms_initialized);
             if (!m_fixedUpdate || !ms_initialized)
                 return;
-
+            
             // update controller data
             for (int i = 0; i < ms_maxTrackers; i++)
             {

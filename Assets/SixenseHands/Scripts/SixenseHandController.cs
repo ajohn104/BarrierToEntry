@@ -23,15 +23,18 @@ public class SixenseHandController : MonoBehaviour
 	// Updates the animated object from controller input.
 	void Update()
 	{
+        //Debug.Log(m_trackers.Length);
         SixenseCore.TrackerVisual tracker = null;
         foreach(var t in m_trackers)
         {
+            //Debug.Log(t.HasInput);
             if (t.HasInput)
             {
                 tracker = t;
                 break;
             }
         }
+        //Debug.Log(tracker);
 
         if (tracker == null)
             return;
