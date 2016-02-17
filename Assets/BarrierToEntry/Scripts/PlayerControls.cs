@@ -17,7 +17,7 @@ namespace BarrierToEntry
         public Rigidbody rb;
         
         private readonly Vector3 saberHandGripRotOffset = new Vector3(-90, 180, 0);
-        private readonly Vector3 handRotOffset = new Vector3(0, 180, 0);
+        private readonly Vector3 handRotOffset = new Vector3(180, 90, 90);
 
         private readonly Vector3 handGripIKOffset = new Vector3(0, -180, -90);
         private readonly Vector3 handIKOffset = new Vector3(-90, 180, 0);
@@ -40,6 +40,7 @@ namespace BarrierToEntry
         private Tracker controllerLeft;
         private Tracker controllerRight;
 
+        private Vector3 gripFineTuneRotOffset = new Vector3(-30, 0, 0);
         public Device device;
 
         void Start()
@@ -102,17 +103,10 @@ namespace BarrierToEntry
         // greatly improve the accuracy of relative world-game position tracking.
         public void CalibrateUserArmLength()
         {
-            // In millimeters, I guess.
             float realRightArmLength = Vector3.Distance(GetRealPosition(controllerRight), realRightShoulderPos);
             float realLeftArmLength = Vector3.Distance(GetRealPosition(controllerLeft), realLeftShoulderPos);
-
-            Debug.Log("Right arm: " + realRightArmLength + "mm long");
-            Debug.Log("Left arm: " + realLeftArmLength + "mm long");
-            Debug.Log("Character arm length: " + armLength + " units long");
             float averageRealArmLength = (realRightArmLength + realLeftArmLength) / 2f;
             device.m_worldUnitScaleInMillimeters = averageRealArmLength / armLength;
-            Debug.Log("Proper world-game scale: " + device.m_worldUnitScaleInMillimeters);
-            Debug.Log("------------");
         }
 
         void Update()
@@ -178,8 +172,10 @@ namespace BarrierToEntry
                 handGrip.position = rightArmPos + (armLength / rightArmOffset.magnitude)*rightArmOffset;
             }
                     
-            handGrip.localRotation = controllerRight.Rotation;
+            handGrip.rotation = controllerRight.Rotation;
+            handGrip.Rotate(gripFineTuneRotOffset, Space.Self);
             handGrip.Rotate(saberHandGripRotOffset);
+            //handGrip.Rotate(gripFineTuneRotOffset);
 
             hand.localPosition = controllerLeft.Position;
             hand.localPosition += leftCalibOffset;
