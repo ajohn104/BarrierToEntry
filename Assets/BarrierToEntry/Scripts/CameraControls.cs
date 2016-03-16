@@ -32,10 +32,12 @@ namespace BarrierToEntry
             if (Application.platform == RuntimePlatform.WindowsPlayer)
             {
                 camTrans.Rotate(-rotationY, rotationX, 0);
+                camTrans.rotation = Quaternion.Euler(new Vector3(camTrans.rotation.eulerAngles.x, camTrans.rotation.eulerAngles.y, 0));
             }
             if (Application.platform == RuntimePlatform.WindowsEditor)
             {
                 camTrans.Rotate(-rotationY / verticalSpeed * 40f, rotationX / horizontalSpeed * 40f, 0);
+                camTrans.rotation = Quaternion.Euler(new Vector3(camTrans.rotation.eulerAngles.x, camTrans.rotation.eulerAngles.y, 0));
             }
         }
     }
