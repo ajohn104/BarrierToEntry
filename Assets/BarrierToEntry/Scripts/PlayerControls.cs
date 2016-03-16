@@ -143,8 +143,8 @@ namespace BarrierToEntry
                 CalibrateUserArmLength();
             }
 
-            anim.SetFloat("Forward", controllerRight.JoystickY);
-            transform.Rotate(new Vector3(0, -3f* (Mathf.Rad2Deg * Mathf.Acos(controllerRight.JoystickX)-90f)/180f, 0));
+            anim.SetFloat("Forward", controllerLeft.JoystickY);
+            transform.Rotate(new Vector3(0, -3f* (Mathf.Rad2Deg * Mathf.Acos(controllerLeft.JoystickX)-90f)/180f, 0));
 
             Vector3 calculatedGripPosition = transform.TransformPoint(controllerRight.Position + rightCalibOffset);
             Vector3 rightArmPos = anim.GetBoneTransform(HumanBodyBones.RightUpperArm).position;
