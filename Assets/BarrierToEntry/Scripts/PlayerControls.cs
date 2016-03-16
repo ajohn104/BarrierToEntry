@@ -20,13 +20,6 @@ namespace BarrierToEntry
         public Transform targetA;
         public Transform targetB;
 
-        public Rigidbody rbTargetA;
-        public Rigidbody rbTargetB;
-
-        //public FixedJoint fixedJointTargetA;
-        public ConfigurableJoint confJointTargetA;
-        
-
         private readonly Vector3 saberHandGripRotOffset = new Vector3(-90, 180, 0);
         private readonly Vector3 handRotOffset = new Vector3(180, 90, 90);
 
@@ -35,6 +28,11 @@ namespace BarrierToEntry
 
         private Vector3 leftCalibOffset = Vector3.zero;
         private Vector3 rightCalibOffset = Vector3.zero;
+
+        public Collider playerCol;
+        public Collider saberCol;
+
+        private Vector3 initSaberPos;
         
         private float armLength = 0f;
         private readonly HumanBodyBones[] rightArmBones = new HumanBodyBones[] {
@@ -58,6 +56,8 @@ namespace BarrierToEntry
         {
             GenerateArmLength();
             GenerateHandSize();
+            initSaberPos = targetA.transform.localPosition;
+            Physics.IgnoreCollision(playerCol, saberCol);
         }
 
         private bool InputCheck()
@@ -124,7 +124,7 @@ namespace BarrierToEntry
         Vector3 lastRot = Vector3.zero;
         void FixedUpdate()
         {
-            if(!InputCheck()) return;
+            if (!InputCheck()) return;
 
             // Face screen with Rift and press "A" on the primary controller (currently primary is always in your right hand) to reset and calibrate the Oculus
             if (VRCenter.VREnabled && controllerRight.GetButtonDown(Buttons.START))
@@ -135,6 +135,7 @@ namespace BarrierToEntry
             if(controllerLeft.GetButton(Buttons.BUMPER) && controllerRight.GetButton(Buttons.BUMPER))
             {
                 CalibrateShoulderPositions();
+                handGrip.position = transform.TransformPoint(controllerRight.Position + rightCalibOffset);
             }
 
             if (controllerLeft.GetButton(Buttons.JOYSTICK) && controllerRight.GetButton(Buttons.JOYSTICK))
@@ -142,240 +143,28 @@ namespace BarrierToEntry
                 CalibrateUserArmLength();
             }
 
-            // I fully intend on improving this animation stuff later, but I'm focusing on integrating the hand tracking first
-            /*anim.SetBool("RunForward", primaryController.getButton(Controller.Button.D_UP));
-            if(primaryController.getButton(Controller.Button.D_UP))
-            {
-                Vector3 movement = new Vector3(0f, 0f, 1f);
-
-                // Make movement vector proportional to the speed per second.
-                movement *= 6 * Time.deltaTime;
-
-                // Move the player to it's current position plus the movement.
-                rb.MovePosition(transform.position + transform.rotation * movement);
-            }
-
-            anim.SetBool("TurnLeft", primaryController.getButton(Controller.Button.D_LEFT));
-            if (primaryController.getButton(Controller.Button.D_LEFT))
-            {
-                Vector3 vec = new Vector3(0f, -100f, 0f);
-                Quaternion deltaRotation = Quaternion.Euler(vec * Time.deltaTime + transform.rotation.eulerAngles);
-                rb.AddRelativeTorque(vec * rb.mass / 2);
-                transform.rotation = deltaRotation;
-            }
-
-            anim.SetBool("TurnRight", primaryController.getButton(Controller.Button.D_RIGHT));
-            if (primaryController.getButton(Controller.Button.D_RIGHT))
-            {
-                Vector3 vec = new Vector3(0f, 100f, 0f);
-                Quaternion deltaRotation = Quaternion.Euler(vec * Time.deltaTime + transform.rotation.eulerAngles);
-                rb.AddRelativeTorque(vec * rb.mass / 2);
-                transform.rotation = deltaRotation;
-            }
-            */
-
             anim.SetFloat("Forward", controllerRight.JoystickY);
-            //Debug.Log(fixedJointTargetA.anchor);
-            //fixedJointTargetA.anchor = controllerRight.Position;
-            //fixedJointTargetA.
-            // rbTargetA.position = controllerRight.Position;
-            SoftJointLimit softLimit = confJointTargetA.linearLimit;
-            softLimit.limit = armLength;
-            confJointTargetA.linearLimit = softLimit;
-            confJointTargetA.targetPosition = controllerRight.Position;
-            //confJointTargetA.anchor = controllerRight.Position;
-            confJointTargetA.targetRotation = controllerRight.Rotation;
-            //confJointTargetA.
+            transform.Rotate(new Vector3(0, -3f* (Mathf.Rad2Deg * Mathf.Acos(controllerRight.JoystickX)-90f)/180f, 0));
 
-
-            return;
-
-            float dt = Time.deltaTime;
-            Vector3 saberPositionalOffset = (controllerRight.Position + rightCalibOffset + anim.transform.position - handGrip.position);
-            
-            float saberDistanceOffset = saberPositionalOffset.magnitude; // Clamp top speed in future? Would it even be necessary or beneficial? I may need to for the future force increments in block sequences
-            rbSaber.velocity = ( dt != 0f ? saberPositionalOffset / dt : Vector3.zero ); // Divide by zero is avoided.
-
-            /*
-            rbSaber.velocity *= Mathf.Clamp(3*Vector3.Distance(controllerRight.Position + rightCalibOffset + anim.transform.position, handGrip.position), 0f, 1f);
-            rbSaber.velocity = rbSaber.velocity.magnitude * (controllerRight.Position + rightCalibOffset + anim.transform.position - handGrip.position).normalized;
-            rbSaber.AddForce((controllerRight.Position + rightCalibOffset + anim.transform.position- handGrip.position).normalized * Mathf.Clamp(100 * Vector3.Distance(controllerRight.Position + rightCalibOffset + anim.transform.position, handGrip.position), 0f, 75f), ForceMode.Force);
-            */
-
-            //rbSaber.MovePosition(controllerRight.Position + rightCalibOffset + anim.transform.position);
-            //rbSaber.velocity = rbSaber.velocity.normalized*Mathf.Clamp(100*Vector3.Distance(controllerRight.Position + rightCalibOffset + anim.transform.position, handGrip.position), 0f, 50f);
-            //Debug.Log(rbSaber.velocity);
-            //handGrip.localPosition = controllerRight.Position;
-            //handGrip.localPosition += rightCalibOffset;
-
+            Vector3 calculatedGripPosition = transform.TransformPoint(controllerRight.Position + rightCalibOffset);
             Vector3 rightArmPos = anim.GetBoneTransform(HumanBodyBones.RightUpperArm).position;
-            Vector3 rightArmOffset = handGrip.position - rightArmPos;
+            Vector3 rightArmOffset = calculatedGripPosition - rightArmPos;
 
             if (rightArmOffset.magnitude > armLength)
             {
-                rbSaber.position = rightArmPos + (armLength / rightArmOffset.magnitude)*rightArmOffset;
+                calculatedGripPosition = rightArmPos + (armLength / rightArmOffset.magnitude) * rightArmOffset;
             }
 
-            /*Quaternion originalRotGrip = handGrip.rotation;
-            Quaternion originalLocalRotGrip = handGrip.localRotation;*/
             targetA.localRotation = controllerRight.Rotation;
             targetA.Rotate(gripFineTuneRotOffset);
             targetA.Rotate(saberHandGripRotOffset);
 
-            /*Debug.Log("-------------------------------");
-            Debug.Log("controller world rotation: " + controllerRight.Rotation.eulerAngles);
-            Debug.Log("gripFineTuneRotOffset rotation: " + gripFineTuneRotOffset);
-            Debug.Log("saberHandGripRotOffset rotation: " + saberHandGripRotOffset);
-            Debug.Log("final intended world rotation: " + handGrip.eulerAngles);
-            Debug.Log("final intended local rotation: " + handGrip.localEulerAngles);
-            Vector3 calculatedRot = controllerRight.Rotation.eulerAngles;
-            //calculatedRot = Quaternion.Euler(calculatedRot) * gripFineTuneRotOffset + calculatedRot;
-            //calculatedRot =  (Quaternion.Euler(calculatedRot) * (Quaternion.Euler(gripFineTuneRotOffset) * (Quaternion.Euler(calculatedRot)))).eulerAngles;
-            calculatedRot = (Quaternion.Euler( gripFineTuneRotOffset) * Quaternion.Euler(calculatedRot)).eulerAngles;
-            calculatedRot.x %= 360f;
-            calculatedRot.y %= 360f;
-            calculatedRot.z %= 360f;
+            rbSaber.MovePosition(calculatedGripPosition);
+            //rbSaber.MoveRotation(Quaternion.Lerp(rbSaber.rotation, targetA.rotation, Mathf.Clamp(Time.deltaTime, 0.1f, 1.0f)) );  // Slightly improves tunneling issue at cost of response time
+            rbSaber.MoveRotation(targetA.rotation);
 
-            //calculatedRot = Quaternion.Euler(calculatedRot) * saberHandGripRotOffset + calculatedRot;
-            //calculatedRot =  (Quaternion.Euler(calculatedRot) * (Quaternion.Euler(saberHandGripRotOffset) * (Quaternion.Euler(calculatedRot)))).eulerAngles;
-            calculatedRot = (Quaternion.Euler(saberHandGripRotOffset) * Quaternion.Euler(calculatedRot)).eulerAngles;
-            calculatedRot.x %= 360f;
-            calculatedRot.y %= 360f;
-            calculatedRot.z %= 360f;
 
-            Debug.Log("final calculated rotation: " + calculatedRot);*/
-
-            float saberRotOffsetAngle = Quaternion.Angle(targetA.localRotation, handGrip.localRotation);
-            //Debug.Log("rot offset: " + saberRotOffsetAngle);
-
-            Vector3 optimal = (targetA.localEulerAngles - handGrip.localEulerAngles);
-            optimal.x %= 360;
-            if (optimal.x > 180) optimal.x -= 360;
-            else if (optimal.x <= -180) optimal.x += 360;
-            optimal.y %= 360;
-            if (optimal.y > 180) optimal.y -= 360;
-            else if (optimal.y <= -180) optimal.y += 360;
-            optimal.z %= 360;
-            if (optimal.z > 180) optimal.z -= 360;
-            else if (optimal.z <= -180) optimal.z += 360;
-            optimal *= Mathf.Deg2Rad;
-            Debug.Log("---------------------");
-            Debug.Log("saber velocity: " + rbSaber.angularVelocity);
-            Debug.Log("optimal offset: " + optimal);
-            Debug.Log("dt: " + dt);
-
-            float saberRotMarginOfError = 0.01f;
-
-            //rbSaber.angularVelocity = (dt != 0) ? new Vector3(
-            //        (Mathf.Abs(optimal.x) > saberRotMarginOfError) ? optimal.x : 0f,
-            //        (Mathf.Abs(optimal.y) > saberRotMarginOfError) ? optimal.y : 0f,
-            //        (Mathf.Abs(optimal.z) > saberRotMarginOfError) ? optimal.z : 0f
-            //    ) : Vector3.zero;
-
-            //rbSaber.angularVelocity = Vector3.zero;
-
-            Vector3 resultAngleVel = optimal;
-            //resultAngleVel = resultAngleVel.normalized;
-            resultAngleVel = (dt != 0) ? resultAngleVel / dt: Vector3.zero;
-            //resultAngleVel *= Mathf.Deg2Rad;
-            //resultAngleVel /= 100f;
-            //Debug.Log("resultAngleVel: " + resultAngleVel);
-            //Debug.Log("expected rotation change: " + resultAngleVel*dt);
-            rbSaber.maxAngularVelocity = 20f;
-            if (Mathf.Abs(saberRotOffsetAngle) > 0.01f)
-            {
-                rbSaber.angularVelocity = handGrip.rotation * resultAngleVel;
-                //rbSaber.angularVelocity = handGrip.rotation * rbSaber.angularVelocity;
-                Vector3 finalRotVel = new Vector3(
-                    (Mathf.Abs(rbSaber.angularVelocity.x) > saberRotMarginOfError) ? rbSaber.angularVelocity.x : 0f,
-                    (Mathf.Abs(rbSaber.angularVelocity.y) > saberRotMarginOfError) ? rbSaber.angularVelocity.y : 0f,
-                    (Mathf.Abs(rbSaber.angularVelocity.z) > saberRotMarginOfError) ? rbSaber.angularVelocity.z : 0f
-                );
-                Debug.Log("finalRotVel: " + finalRotVel);
-                rbSaber.angularVelocity = finalRotVel;
-                //rbSaber.angularVelocity = finalRotVel;//, ForceMode.Impulse);
-            }
-
-            //rbSaber.MoveRotation(targetA.rotation);
-            //rbSaber.angularVelocity = resultAngleVel;
-
-            //rbSaber.AddTorque(Vector3.up*Mathf.PI*10f, ForceMode.VelocityChange);
-            /*Vector3 resultAngleVel = new Vector3(
-                    (Mathf.Abs(optimal.x) > saberRotMarginOfError) ? Mathf.Floor(optimal.x) / dt : 0f,
-                    (Mathf.Abs(optimal.y) > saberRotMarginOfError) ? Mathf.Floor(optimal.y) / dt : 0f,
-                    (Mathf.Abs(optimal.z) > saberRotMarginOfError) ? Mathf.Floor(optimal.z) / dt : 0f
-                );
-            Debug.Log("expected angular velocity: " + resultAngleVel);*/
-            //Debug.Log("max angular velocity: " + rbSaber.maxAngularVelocity);
-
-            //handGrip.localRotation = targetA.localRotation;
-            /*Quaternion goalRotGrip = handGrip.rotation;
-            Quaternion goalLocalRotGrip = handGrip.localRotation;
-            //handGrip.rotation = originalRotGrip;
-            
-            rbSaber.MoveRotation(goalRotGrip);*/
-            //handGrip.eulerAngles = new Vector3(goalRotGrip.eulerAngles.x, goalRotGrip.eulerAngles.y, handGrip.eulerAngles.z);
-
-            /*Debug.Log("Last rotation: " + lastRot);
-            Debug.Log("New rotation: " + handGrip.localEulerAngles);
-            Debug.Log("Difference: " + (handGrip.localEulerAngles - lastRot));
-            lastRot = handGrip.localEulerAngles;*/
-            //rbSaber.angularVelocity = Vector3.up*(2f*Mathf.PI);
-            /*//Debug.Log(rbSaber.angularVelocity);
-            
-
-            Vector3 optimal = (goalLocalRotGrip.eulerAngles - originalLocalRotGrip.eulerAngles);
-            optimal.x %= 360;
-            if (optimal.x > 180) optimal.x -= 360;
-            else if (optimal.x <= -180) optimal.x += 360;
-            optimal.y %= 360;
-            if (optimal.y > 180) optimal.y -= 360;
-            else if (optimal.y <= -180) optimal.y += 360;
-            optimal.z %= 360;
-            if (optimal.z > 180) optimal.z -= 360;
-            else if (optimal.z <= -180) optimal.z += 360;
-            Debug.Log(optimal);
-
-            rbSaber.angularVelocity = new Vector3(
-                rbSaber.angularVelocity.x * Mathf.Clamp(Mathf.Abs(optimal.x) / 10f, 0, 1f),
-                rbSaber.angularVelocity.y * Mathf.Clamp(Mathf.Abs(optimal.y) / 10f, 0, 1f),
-                rbSaber.angularVelocity.z * Mathf.Clamp(Mathf.Abs(optimal.z) / 10f, 0, 1f)
-            );
-
-            rbSaber.angularVelocity = optimal.normalized * rbSaber.angularVelocity.magnitude;
-
-            rbSaber.AddRelativeTorque(optimal * 5f);
-            */
-            //rbSaber.angularVelocity *= Mathf.Clamp(Mathf.Abs(Vector3.Angle(originalRotGrip.eulerAngles, goalRotGrip.eulerAngles)) / 5f , 0f, 1f);
-            //rbSaber.angularVelocity = rbSaber.angularVelocity.magnitude * (goalRotGrip.eulerAngles - originalRotGrip.eulerAngles).normalized;
-            //Debug.Log(Mathf.Clamp(Mathf.Abs(Vector3.Angle(originalRotGrip.eulerAngles, goalRotGrip.eulerAngles)) / 5f, 0f, 1f));
-            /*rbSaber.angularVelocity = new Vector3(
-                Mathf.Clamp((goalRotGrip.eulerAngles - originalRotGrip.eulerAngles).x / 100f, 0, 1f),
-                Mathf.Clamp((goalRotGrip.eulerAngles - originalRotGrip.eulerAngles).y / 100f, 0, 1f),
-                Mathf.Clamp((goalRotGrip.eulerAngles - originalRotGrip.eulerAngles).z / 100f, 0, 1f)
-                );
-            
-            //Debug.Log(Mathf.Clamp(Mathf.Abs((goalRotGrip.eulerAngles - originalRotGrip.eulerAngles).x) / 300f, 0, 1f));
-            Debug.Log(rbSaber.angularVelocity);
-            Vector3 diff = goalRotGrip.eulerAngles - originalRotGrip.eulerAngles;
-            diff.x %= 360;
-            if(diff.x > 180) diff.x-=360;
-            diff.y %= 360;
-            if (diff.y > 180) diff.y -= 360;
-            diff.z %= 360;
-            if (diff.z > 180) diff.z -= 360;
-            Debug.Log(diff.normalized);
-            //diff.z = 0;
-            //diff.y = 0;
-            rbSaber.AddTorque(diff.normalized);*/
-            //rbSaber.MoveRotation(goalRotGrip);
-            //rbSaber.AddTorque(rot.normalized, ForceMode.Force);
-
-            //rbSaber.AddTorque(Quaternion.FromToRotation(initFor, finalFor).eulerAngles.normalized);
-            //handGrip.Rotate(gripFineTuneRotOffset);
-
-            hand.localPosition = controllerLeft.Position;
-            hand.localPosition += leftCalibOffset;
+            hand.position = transform.rotation * (controllerLeft.Position + leftCalibOffset) + transform.position;
 
             Vector3 leftArmPos = anim.GetBoneTransform(HumanBodyBones.LeftUpperArm).position;
             Vector3 leftArmOffset = hand.position - leftArmPos;
@@ -410,19 +199,20 @@ namespace BarrierToEntry
             if (controllerRight == null || controllerLeft == null)
                 return;
             Quaternion originalRotGrip = handGrip.rotation;
-
+            Vector3 calculatedRot = controllerRight.Rotation.eulerAngles;
+            
             handGrip.rotation = controllerRight.Rotation;
-            handGrip.Rotate(gripFineTuneRotOffset, Space.Self);
+            handGrip.Rotate(gripFineTuneRotOffset);
             handGrip.Rotate(saberHandGripRotOffset);
 
             Quaternion goalRotGrip = handGrip.rotation;
             Vector3 up = handGrip.up;
             handGrip.rotation = originalRotGrip;
-            //Debug.Log(goalRotGrip.eulerAngles);
+            
             Gizmos.color = Color.red;
             Gizmos.DrawLine(handGrip.position, handGrip.position+up);
-            //Gizmos.DrawSphere(anim.transform.position + controllerRight.Position + rightCalibOffset, 0.01f);
-//(controllerRight.Position + rightCalibOffset - handGrip.localPosition).normalized
+
+            Gizmos.DrawSphere(transform.TransformPoint(controllerRight.Position + rightCalibOffset), 0.01f);
         }
     }
 }
