@@ -9,6 +9,7 @@ namespace BarrierToEntry
     {
 
         public Transform camTrans;
+        public PlayerControls controls;
 
         // Mouse sensitivity
         public float horizontalSpeed = 4.0F;
@@ -28,6 +29,11 @@ namespace BarrierToEntry
 
             float rotationX = h * Time.deltaTime;
             float rotationY = v * Time.deltaTime;
+
+            if(controls.InputCheck())
+            {
+                rotationY = verticalSpeed * controls.controllerRight.JoystickY*Time.deltaTime;
+            }
 
             if (Application.platform == RuntimePlatform.WindowsPlayer)
             {

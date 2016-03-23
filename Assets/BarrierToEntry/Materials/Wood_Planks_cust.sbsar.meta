@@ -1,12 +1,12 @@
 fileFormatVersion: 2
-guid: a1ade89e15bd7374db3b2963ea589a38
-timeCreated: 1458250911
+guid: 6c539c70b59fffb4b84ecc556294e9b8
+timeCreated: 1458251086
 licenseType: Free
 SubstanceImporter:
   serializedVersion: 5
   materialInstances:
   - serializedVersion: 16
-    name: Wood_Planks_01
+    name: Wood_Planks_cust
     prototypeName: Wood_Planks_01
     shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
     shaderKeywords: _NORMALMAP _PARALLAXMAP
@@ -121,7 +121,7 @@ SubstanceImporter:
     materialInformation:
       serializedVersion: 5
       offset: {x: 0, y: 0}
-      scale: {x: 15, y: 15}
+      scale: {x: 5, y: 1}
       generateMipmaps: 1
       generateAllOutputs: 0
       animationUpdateRate: 0
@@ -133,14 +133,14 @@ SubstanceImporter:
             name: _MainTex
           second:
             texture: {instanceID: 0}
-            scale: {x: 1, y: 1}
+            scale: {x: 5, y: 1}
             offset: {x: 0, y: 0}
         data:
           first:
             name: _BumpMap
           second:
             texture: {instanceID: 0}
-            scale: {x: 1, y: 1}
+            scale: {x: 5, y: 0}
             offset: {x: 0, y: 0}
         data:
           first:
@@ -154,7 +154,7 @@ SubstanceImporter:
             name: _ParallaxMap
           second:
             texture: {instanceID: 0}
-            scale: {x: 1, y: 1}
+            scale: {x: 5, y: 0}
             offset: {x: 0, y: 0}
         data:
           first:
@@ -168,7 +168,7 @@ SubstanceImporter:
             name: _EmissionMap
           second:
             texture: {instanceID: 0}
-            scale: {x: 1, y: 1}
+            scale: {x: 5, y: 1}
             offset: {x: 0, y: 0}
         data:
           first:
@@ -250,22 +250,17 @@ SubstanceImporter:
             name: _Color
           second: {r: 1, g: 1, b: 1, a: 1}
     textureParameters:
-    - name: Wood_Planks_01_Diffuse
-      alphaSource: 5
+    - name: Wood_Planks_cust_Diffuse
+      alphaSource: 6
       filterMode: 1
       aniso: 1
       wrapMode: 0
-    - name: Wood_Planks_01_Specular
+    - name: Wood_Planks_cust_Normal
       alphaSource: 0
       filterMode: 1
       aniso: 1
       wrapMode: 0
-    - name: Wood_Planks_01_Normal
-      alphaSource: 0
-      filterMode: 1
-      aniso: 1
-      wrapMode: 0
-    - name: Wood_Planks_01_Height
+    - name: Wood_Planks_cust_Height
       alphaSource: 0
       filterMode: 1
       aniso: 1

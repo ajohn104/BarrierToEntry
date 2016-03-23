@@ -46,11 +46,13 @@ namespace BarrierToEntry
 
         private float handDist = 0;
 
-        private Tracker controllerLeft;
-        private Tracker controllerRight;
+        public Tracker controllerLeft;
+        public Tracker controllerRight;
 
         private Vector3 gripFineTuneRotOffset = new Vector3(-30, 0, 0);
         public Device device;
+        public float collisionPrevention = 1f;
+        public Transform saberCoM;
 
         void Start()
         {
@@ -58,9 +60,11 @@ namespace BarrierToEntry
             GenerateHandSize();
             initSaberPos = targetA.transform.localPosition;
             Physics.IgnoreCollision(playerCol, saberCol);
+            //fixedJointHandGrip.autoConfigureConnectedAnchor = true;
+            rbSaber.centerOfMass = rbSaber.transform.InverseTransformPoint(saberCoM.position);
         }
 
-        private bool InputCheck()
+        public bool InputCheck()
         {
             if(!SixenseCore.Device.BaseConnected)
             {
@@ -159,11 +163,17 @@ namespace BarrierToEntry
             targetA.Rotate(gripFineTuneRotOffset);
             targetA.Rotate(saberHandGripRotOffset);
 
-            rbSaber.MovePosition(calculatedGripPosition);
+            Vector3 moveOffset = calculatedGripPosition - rbSaber.position;
+            //Vector3 partialMove = collisionPrevention * moveOffset + rbSaber.position;
+            Vector3 partialMove = Vector3.Lerp(rbSaber.position, calculatedGripPosition, collisionPrevention);
+            rbSaber.MovePosition(partialMove);
+
+            //handGrip.position = partialMove;
             //rbSaber.MoveRotation(Quaternion.Lerp(rbSaber.rotation, targetA.rotation, Mathf.Clamp(Time.deltaTime, 0.1f, 1.0f)) );  // Slightly improves tunneling issue at cost of response time
-            rbSaber.MoveRotation(targetA.rotation);
-
-
+            //rbSaber.MoveRotation(targetA.rotation);
+            /*if(collisionPrevention == 1)*/
+            rbSaber.MoveRotation(Quaternion.Lerp(rbSaber.rotation, targetA.rotation, collisionPrevention)); 
+            
             hand.position = transform.rotation * (controllerLeft.Position + leftCalibOffset) + transform.position;
 
             Vector3 leftArmPos = anim.GetBoneTransform(HumanBodyBones.LeftUpperArm).position;
@@ -198,16 +208,15 @@ namespace BarrierToEntry
         {
             if (controllerRight == null || controllerLeft == null)
                 return;
-            Quaternion originalRotGrip = handGrip.rotation;
-            Vector3 calculatedRot = controllerRight.Rotation.eulerAngles;
+            Quaternion originalRotGrip = targetA.rotation;
             
-            handGrip.rotation = controllerRight.Rotation;
-            handGrip.Rotate(gripFineTuneRotOffset);
-            handGrip.Rotate(saberHandGripRotOffset);
+            targetA.rotation = controllerRight.Rotation;
+            targetA.Rotate(gripFineTuneRotOffset);
+            targetA.Rotate(saberHandGripRotOffset);
 
-            Quaternion goalRotGrip = handGrip.rotation;
-            Vector3 up = handGrip.up;
-            handGrip.rotation = originalRotGrip;
+            Quaternion goalRotGrip = targetA.rotation;
+            Vector3 up = targetA.up;
+            targetA.rotation = originalRotGrip;
             
             Gizmos.color = Color.red;
             Gizmos.DrawLine(handGrip.position, handGrip.position+up);

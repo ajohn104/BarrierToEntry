@@ -337,10 +337,22 @@ namespace SixenseCore
         {
             if (m_Enabled && !m_Docked && m_Index >= 0)
             {
+                Debug.Log("Vibing hard, index: " + m_Index + ", mag: " + magnitude);
                 Plugin.sxCoreSetVibration((uint)m_Index, 0, magnitude);
             }
         }
 
+        public float GetVibration() {
+            float mag;
+            if (Plugin.sxCoreGetVibration((uint)m_Index, 0, out mag) == PluginTypes.Result.SUCCESS)
+            {
+                return mag;
+            }
+            else {
+                Debug.Log("Get failure");
+                return 0f;
+            }
+        }
         /// <summary>
         /// Get device info
         /// </summary>
@@ -405,7 +417,7 @@ namespace SixenseCore
             m_SerialNumber = info.serial_number;
             m_HardwareType = (Hardware)info.device_type;
             // m_Index = info.tracked_device_index; // Redundant, and screws up Hydra
-
+            
             byte bid = (byte)(info.board_hardware_gpio & gpio_id_mask);
             byte brev = (byte)(info.board_hardware_gpio & gpio_rev_mask);
 
