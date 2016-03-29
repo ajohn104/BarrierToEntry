@@ -54,6 +54,18 @@ namespace BarrierToEntry
         public float collisionPrevention = 1f;
         public Transform saberCoM;
 
+        public float rumbleCutoff = 10f;
+        public float rumbleRange = 15f;
+
+
+        private float _saberErrorDist = 0f;
+        public float saberErrorDist {
+            get
+            {
+                return _saberErrorDist;
+            }
+        }
+
         void Start()
         {
             GenerateArmLength();
@@ -87,7 +99,7 @@ namespace BarrierToEntry
 
         private void GenerateHandSize()
         {
-            handDist = Vector3.Distance(anim.GetBoneTransform(HumanBodyBones.RightHand).position, anim.GetBoneTransform(HumanBodyBones.RightMiddleProximal).position);
+            handDist = Vector3.Distance(anim.GetBoneTransform(HumanBodyBones.RightHand).position, anim.GetBoneTransform(HumanBodyBones.RightMiddleProximal).position)/2f;
         }
 
         private Vector3 GetRealPosition(Tracker con)
@@ -103,15 +115,15 @@ namespace BarrierToEntry
             Transform root = anim.transform;
             Transform rightArm = anim.GetBoneTransform(HumanBodyBones.RightUpperArm);
             Transform leftArm = anim.GetBoneTransform(HumanBodyBones.LeftUpperArm);
-            
-            Vector3 bodyOffsetRight = root.forward * handDist - anim.transform.position;
-            Vector3 bodyOffsetLeft = root.forward * handDist - anim.transform.position;
 
-            rightCalibOffset = rightArm.position + bodyOffsetRight - controllerRight.Position;
-            leftCalibOffset = leftArm.position + bodyOffsetLeft - controllerLeft.Position;
+            Vector3 bodyOffset = Vector3.forward * handDist;
+
+            rightCalibOffset = transform.InverseTransformPoint(rightArm.position) + bodyOffset - controllerRight.Position;
+            leftCalibOffset = transform.InverseTransformPoint(leftArm.position) + bodyOffset - controllerLeft.Position;
 
             realLeftShoulderPos = GetRealPosition(controllerLeft);
             realRightShoulderPos = GetRealPosition(controllerRight);
+            
         }
 
         // In this test, the user must fully extend their arms in any direction, and the system will 
@@ -122,7 +134,10 @@ namespace BarrierToEntry
             float realRightArmLength = Vector3.Distance(GetRealPosition(controllerRight), realRightShoulderPos);
             float realLeftArmLength = Vector3.Distance(GetRealPosition(controllerLeft), realLeftShoulderPos);
             float averageRealArmLength = (realRightArmLength + realLeftArmLength) / 2f;
-            device.m_worldUnitScaleInMillimeters = averageRealArmLength / armLength;
+            //Debug.Log("your average arm length (in mm): " + averageRealArmLength);
+            //Debug.Log("character arm length (in units): " + armLength);
+            //Debug.Log("1 unit to mm: " + (averageRealArmLength / armLength));
+            device.m_worldUnitScaleInMillimeters = (armLength != 0f && averageRealArmLength != 0f) ? (averageRealArmLength / armLength) : device.m_worldUnitScaleInMillimeters;
             
         }
         Vector3 lastRot = Vector3.zero;
@@ -164,15 +179,17 @@ namespace BarrierToEntry
             targetA.Rotate(saberHandGripRotOffset);
 
             Vector3 moveOffset = calculatedGripPosition - rbSaber.position;
-            //Vector3 partialMove = collisionPrevention * moveOffset + rbSaber.position;
             Vector3 partialMove = Vector3.Lerp(rbSaber.position, calculatedGripPosition, collisionPrevention);
             rbSaber.MovePosition(partialMove);
+            _saberErrorDist = moveOffset.magnitude;
 
-            //handGrip.position = partialMove;
-            //rbSaber.MoveRotation(Quaternion.Lerp(rbSaber.rotation, targetA.rotation, Mathf.Clamp(Time.deltaTime, 0.1f, 1.0f)) );  // Slightly improves tunneling issue at cost of response time
-            //rbSaber.MoveRotation(targetA.rotation);
-            /*if(collisionPrevention == 1)*/
-            rbSaber.MoveRotation(Quaternion.Lerp(rbSaber.rotation, targetA.rotation, collisionPrevention)); 
+            rbSaber.MoveRotation(Quaternion.Lerp(rbSaber.rotation, targetA.rotation, collisionPrevention));
+
+            float errorAngle = Mathf.Abs(Quaternion.Angle(rbSaber.rotation, targetA.rotation));
+            
+            errorAngle -= rumbleCutoff;
+            
+            _saberErrorDist += Mathf.Clamp(errorAngle / rumbleRange, 0, 0.5f)*2f;
             
             hand.position = transform.rotation * (controllerLeft.Position + leftCalibOffset) + transform.position;
 
@@ -190,8 +207,8 @@ namespace BarrierToEntry
 
         void OnAnimatorIK()
         {
-            Quaternion computedRot = Quaternion.Euler(handGrip.rotation.eulerAngles) * Quaternion.Euler(handGripIKOffset);
-            Quaternion computedRot2 = Quaternion.Euler(hand.rotation.eulerAngles) * Quaternion.Euler(handIKOffset);
+            Quaternion computedRot =  Quaternion.Euler(handGrip.rotation.eulerAngles) * Quaternion.Euler(handGripIKOffset);
+            Quaternion computedRot2 = Quaternion.Euler(hand.rotation.eulerAngles) * Quaternion.Euler(handIKOffset) * transform.rotation;
 
             anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1.0f);
             anim.SetIKRotationWeight(AvatarIKGoal.RightHand, 1.0f);
@@ -206,20 +223,9 @@ namespace BarrierToEntry
 
         void OnDrawGizmos()
         {
-            if (controllerRight == null || controllerLeft == null)
-                return;
-            Quaternion originalRotGrip = targetA.rotation;
-            
-            targetA.rotation = controllerRight.Rotation;
-            targetA.Rotate(gripFineTuneRotOffset);
-            targetA.Rotate(saberHandGripRotOffset);
-
-            Quaternion goalRotGrip = targetA.rotation;
-            Vector3 up = targetA.up;
-            targetA.rotation = originalRotGrip;
-            
+            if (!InputCheck()) return;
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(handGrip.position, handGrip.position+up);
+            Gizmos.DrawLine(handGrip.position, handGrip.position+ targetA.up);
 
             Gizmos.DrawSphere(transform.TransformPoint(controllerRight.Position + rightCalibOffset), 0.01f);
         }

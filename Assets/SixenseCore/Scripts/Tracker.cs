@@ -337,7 +337,6 @@ namespace SixenseCore
         {
             if (m_Enabled && !m_Docked && m_Index >= 0)
             {
-                Debug.Log("Vibing hard, index: " + m_Index + ", mag: " + magnitude);
                 Plugin.sxCoreSetVibration((uint)m_Index, 0, magnitude);
             }
         }
