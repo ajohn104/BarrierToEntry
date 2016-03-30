@@ -3,70 +3,69 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Text;
 using Coliseo;
-using BarrierToEntry;
 using SixenseCore;
 
 namespace BarrierToEntry
 {
     public class PlayerControls : MonoBehaviour
     {
-        public GameObject saber;
-        public Transform hand;
-        public Transform handGrip;
-        public Animator anim;
-        public Rigidbody rbPlayer;
-        public Rigidbody rbSaber;
+        public Transform hand;              // Not necessary. Removed.
+        public Transform handGrip;          // Implicitly moved to Saber, which will have it by default (since it'll be directly on the SaberGrip gameobject)
+        public Animator anim;               // Moved to Actor as 'anim'; used for all movement
+        public Rigidbody rbPlayer;          // Moved to Actor as 'rb'; not used. -.-
+        public Rigidbody rbSaber;           // Moved to Saber as 'rb'; used for all saber movement
 
-        public Transform targetA;
-        public Transform targetB;
+        public Transform targetA;           // Moved to Saber as 'target'; used for all weapon positioning (the object itself is still a child of the actor, however)
+        public Transform targetB;           // Not necessary
 
-        private readonly Vector3 saberHandGripRotOffset = new Vector3(-90, 180, 0);
-        private readonly Vector3 handRotOffset = new Vector3(180, 90, 90);
+        private readonly Vector3 saberHandGripRotOffset = new Vector3(-90, 180, 0);         // Moved to Saber...for now; used with all saber positioning
+        private readonly Vector3 handRotOffset = new Vector3(180, 90, 90);                  // Moved to Saber...for now; used with all saber positioning (I'm not sure if these should be specific to player yet)
 
-        private readonly Vector3 handGripIKOffset = new Vector3(0, -180, -90);
-        private readonly Vector3 handIKOffset = new Vector3(-90, 180, 0);
+        private readonly Vector3 handGripIKOffset = new Vector3(0, -180, -90);              // Moved to Player; used with non-dominant (n.d.) hand positioning
+        private readonly Vector3 handIKOffset = new Vector3(-90, 180, 0);                   // Moved to Player; used with non-dominant hand positioning 
+                                                                                            //      --> (I don't intend on implementing use of n.d. hand controls for the AI)
 
-        private Vector3 leftCalibOffset = Vector3.zero;
-        private Vector3 rightCalibOffset = Vector3.zero;
+        private Vector3 leftCalibOffset = Vector3.zero;         // Moved to PlayerConfig; used with player-based saber positioning
+        private Vector3 rightCalibOffset = Vector3.zero;        // Moved to PlayerConfig; used with player-based non-dominant hand positioning
 
-        public Collider playerCol;
-        public Collider saberCol;
+        public Collider playerCol;          // Implicitly moved to Actor, which will have it by default as collider (since it'll be directly on the Actor gameobject)
+        public Collider saberCol;           // Implicitly moved to Saber, which will have it by default as collider (since it'll be directly on the SaberGrip gameobject)
 
-        private Vector3 initSaberPos;
+        private Vector3 initSaberPos;       // Not necessary. Removed.
         
-        private float armLength = 0f;
-        private readonly HumanBodyBones[] rightArmBones = new HumanBodyBones[] {
-            HumanBodyBones.RightUpperArm,
+        private float armLength = 0f;       // Moved to ActorConfig
+        private readonly HumanBodyBones[] rightArmBones = new HumanBodyBones[] {        // Moved to ActorConfig; used with limiting saber position within arm's length 
+            HumanBodyBones.RightUpperArm,                                               //          --> (also will be used with ai-player attack predictions)
             HumanBodyBones.RightLowerArm,
             HumanBodyBones.RightHand
         };
 
-        private Vector3 realLeftShoulderPos = Vector3.zero;
-        private Vector3 realRightShoulderPos = Vector3.zero;
+        private Vector3 realLeftShoulderPos = Vector3.zero;         // Moved to PlayerConfig; used with calibrating arm length and hand position
+        private Vector3 realRightShoulderPos = Vector3.zero;        // Moved to PlayerConfig; used with calibrating arm length and hand position
 
-        private float handDist = 0;
+        private float handDist = 0;     // Moved to PlayerConfig; used with calibrating arm length and hand position
 
-        public Tracker controllerLeft;
-        public Tracker controllerRight;
+        public Tracker controllerLeft;      // Moved to Controls; used with player input
+        public Tracker controllerRight;     // Moved to Controls; used with player input
 
-        private Vector3 gripFineTuneRotOffset = new Vector3(-30, 0, 0);
-        public Device device;
-        public float collisionPrevention = 1f;
-        public Transform saberCoM;
+        private Vector3 gripFineTuneRotOffset = new Vector3(-30, 0, 0);     // Moved to Player; used with adjustments due to controller shape (and how the user perceives it versus how it actually outputs data)
+        public Device device;           // Moved to Controls; used with player input
+        public float collisionPrevention = 1f;      // Moved to Saber; used with physics tunneling prevention
+        public Transform saberCoM;      // Moved to Saber; used with physics tunneling prevention
 
-        public float rumbleCutoff = 10f;
-        public float rumbleRange = 15f;
+        public float rumbleCutoff = 10f;        // Moved to Saber; used with vibrational haptic feedback
+        public float rumbleRange = 15f;         // Moved to Saber; used with vibrational haptic feedback
 
 
-        private float _saberErrorDist = 0f;
-        public float saberErrorDist {
+        private float _saberErrorDist = 0f;     // Moved to Saber; used with vibrational haptic feedback
+        public float saberErrorDist {           // Moved to Saber; used with vibrational haptic feedback
             get
             {
                 return _saberErrorDist;
             }
         }
 
-        void Start()
+        void Start()        // TODO: Needs to be broken up, probably.
         {
             GenerateArmLength();
             GenerateHandSize();
@@ -76,7 +75,7 @@ namespace BarrierToEntry
             rbSaber.centerOfMass = rbSaber.transform.InverseTransformPoint(saberCoM.position);
         }
 
-        public bool InputCheck()
+        public bool InputCheck()        // Moved to Controls; used with input management.
         {
             if(!SixenseCore.Device.BaseConnected)
             {
@@ -87,7 +86,7 @@ namespace BarrierToEntry
             return controllerLeft != null && controllerRight != null;
         }
 
-        private void GenerateArmLength()
+        private void GenerateArmLength()        // Moved to ActorConfig; used with the range of motion for hands
         {
             for (int i = 0; i < rightArmBones.Length - 1; i++)
             {
@@ -97,18 +96,18 @@ namespace BarrierToEntry
             }
         }
 
-        private void GenerateHandSize()
+        private void GenerateHandSize()     // Moved to PlayerConfig; used with player positional input
         {
             handDist = Vector3.Distance(anim.GetBoneTransform(HumanBodyBones.RightHand).position, anim.GetBoneTransform(HumanBodyBones.RightMiddleProximal).position)/2f;
         }
 
-        private Vector3 GetRealPosition(Tracker con)
+        private Vector3 GetRealPosition(Tracker con)        // Moved to Controls; used with calibrating arm length and hand position
         {
             return con.Position * device.m_worldUnitScaleInMillimeters;
         }
 
-        // This will be position calibration, and the user will press their hands to the front of their shoulders.
-        private void CalibrateShoulderPositions()
+        // This is for position calibration, and the user will press their hands to the front of their shoulders.
+        private void CalibrateShoulderPositions()       // Moved to PlayerConfig; used with calibrating arm length and hand position
         {
             if (!InputCheck()) return;
 
@@ -122,14 +121,13 @@ namespace BarrierToEntry
             leftCalibOffset = transform.InverseTransformPoint(leftArm.position) + bodyOffset - controllerLeft.Position;
 
             realLeftShoulderPos = GetRealPosition(controllerLeft);
-            realRightShoulderPos = GetRealPosition(controllerRight);
-            
+            realRightShoulderPos = GetRealPosition(controllerRight);   
         }
 
         // In this test, the user must fully extend their arms in any direction, and the system will 
         // calculate their arm length based off the current calibration offsets. This will be used to 
         // greatly improve the accuracy of relative world-game position tracking.
-        public void CalibrateUserArmLength()
+        public void CalibrateUserArmLength()        // Moved to PlayerConfig; used with calibrating arm length and hand position
         {
             float realRightArmLength = Vector3.Distance(GetRealPosition(controllerRight), realRightShoulderPos);
             float realLeftArmLength = Vector3.Distance(GetRealPosition(controllerLeft), realLeftShoulderPos);
@@ -138,10 +136,10 @@ namespace BarrierToEntry
             //Debug.Log("character arm length (in units): " + armLength);
             //Debug.Log("1 unit to mm: " + (averageRealArmLength / armLength));
             device.m_worldUnitScaleInMillimeters = (armLength != 0f && averageRealArmLength != 0f) ? (averageRealArmLength / armLength) : device.m_worldUnitScaleInMillimeters;
-            
         }
-        Vector3 lastRot = Vector3.zero;
-        void FixedUpdate()
+
+        Vector3 lastRot = Vector3.zero;         // Not necessary. Removed.
+        void FixedUpdate()      // TODO: Needs to be broken up. Part of this belongs in controls, part of it in player config possibly, etc, etc. Many new methods.
         {
             if (!InputCheck()) return;
 
@@ -205,7 +203,7 @@ namespace BarrierToEntry
             hand.Rotate(handRotOffset);
         }
 
-        void OnAnimatorIK()
+        void OnAnimatorIK()         // Moved to Player; used with animation
         {
             Quaternion computedRot =  Quaternion.Euler(handGrip.rotation.eulerAngles) * Quaternion.Euler(handGripIKOffset);
             Quaternion computedRot2 = Quaternion.Euler(hand.rotation.eulerAngles) * Quaternion.Euler(handIKOffset) * transform.rotation;
@@ -221,7 +219,7 @@ namespace BarrierToEntry
             anim.SetIKRotation(AvatarIKGoal.LeftHand, computedRot2);
         }
 
-        void OnDrawGizmos()
+        void OnDrawGizmos()     // Moved to Player; used with debugging
         {
             if (!InputCheck()) return;
             Gizmos.color = Color.red;
