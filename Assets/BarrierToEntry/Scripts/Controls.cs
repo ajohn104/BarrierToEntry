@@ -23,6 +23,12 @@ namespace BarrierToEntry
          * That's not to say that controls shouldn't be customizable.
         */
 
+        public Controls(Device deviceBase)
+        {
+            this.device = deviceBase;
+            InputCheck();
+        }
+
         public bool InputCheck()
         {
             if (!SixenseCore.Device.BaseConnected) return false;

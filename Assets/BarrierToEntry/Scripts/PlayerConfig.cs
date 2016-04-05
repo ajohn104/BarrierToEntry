@@ -16,17 +16,16 @@ namespace BarrierToEntry
         private new Player owner;
 
 
-        void GenerateHandSize()
+        public void GenerateHandSize()
         {
             // Temporarily disabled. TODO: Find out if this is helpful.
             //handDist = Vector3.Distance(owner.anim.GetBoneTransform(HumanBodyBones.RightHand).position, anim.GetBoneTransform(HumanBodyBones.RightMiddleProximal).position) / 2f;
         }
 
         // This is for position calibration, and the user will press their hands to the front of their shoulders.
-        private void CalibrateShoulderPositions()
+        public void CalibrateShoulderPositions()
         {
             if (!owner.controls.InputCheck()) return;
-
             Transform root = owner.anim.transform;
             Transform rightArm = owner.anim.GetBoneTransform(HumanBodyBones.RightUpperArm);
             Transform leftArm = owner.anim.GetBoneTransform(HumanBodyBones.LeftUpperArm);
@@ -52,7 +51,7 @@ namespace BarrierToEntry
             //Debug.Log("your average arm length (in mm): " + averageRealArmLength);
             //Debug.Log("character arm length (in units): " + armLength);
             //Debug.Log("1 unit to mm: " + (averageRealArmLength / armLength));
-            owner.controls.device.m_worldUnitScaleInMillimeters = (armLength != 0f && averageRealArmLength != 0f) ? (averageRealArmLength / armLength) : owner.controls.device.m_worldUnitScaleInMillimeters;
+            owner.controls.device.m_worldUnitScaleInMillimeters = (ArmLength != 0f && averageRealArmLength != 0f) ? (averageRealArmLength / ArmLength) : owner.controls.device.m_worldUnitScaleInMillimeters;
         }
 
         public PlayerConfig(Player owner) : base(owner)

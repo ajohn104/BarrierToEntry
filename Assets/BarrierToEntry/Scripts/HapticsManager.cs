@@ -8,7 +8,7 @@ namespace BarrierToEntry
     public class HapticsManager : MonoBehaviour
     {
         public CollisionHandler blockManager;
-        public PlayerControls player;
+        public Player player;
 
         bool playerIndexSet = false;
         PlayerIndex playerIndex;
@@ -21,7 +21,7 @@ namespace BarrierToEntry
         float _blockWeight { get { return blockManager.inBlock?1f:0f; } }
         float _blockErrorWeight {
             get {
-                float errorDist = blockManager.inBlock ? player.saberErrorDist : 0f;
+                float errorDist = blockManager.inBlock ? player.weapon.saberErrorDist : 0f;
                 float rumbleMag =  Mathf.Clamp(errorDist, 0f, saberErrorMax)*2f;
                 return rumbleMag;
             }

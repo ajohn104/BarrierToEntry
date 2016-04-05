@@ -67,12 +67,12 @@ namespace BarrierToEntry
 
         void Start()        // TODO: Needs to be broken up, probably.
         {
-            GenerateArmLength();
-            GenerateHandSize();
-            initSaberPos = targetA.transform.localPosition;
-            Physics.IgnoreCollision(playerCol, saberCol);
+            GenerateArmLength();        // Moved to Actor.Start
+            GenerateHandSize();         // Moved to Player.Start
+            initSaberPos = targetA.transform.localPosition;     // Removed
+            Physics.IgnoreCollision(playerCol, saberCol);       // Moved to Actor.Start
             //fixedJointHandGrip.autoConfigureConnectedAnchor = true;
-            rbSaber.centerOfMass = rbSaber.transform.InverseTransformPoint(saberCoM.position);
+            rbSaber.centerOfMass = rbSaber.transform.InverseTransformPoint(saberCoM.position);      // Moved to Actor.Start
         }
 
         public bool InputCheck()        // Moved to Controls; used with input management.
@@ -141,66 +141,66 @@ namespace BarrierToEntry
         Vector3 lastRot = Vector3.zero;         // Not necessary. Removed.
         void FixedUpdate()      // TODO: Needs to be broken up. Part of this belongs in controls, part of it in player config possibly, etc, etc. Many new methods.
         {
-            if (!InputCheck()) return;
+            if (!InputCheck()) return;      // Moved to Player.Think; used with Controls. TODO: Move control stuff in Player.Think to Controls.cs
 
             // Face screen with Rift and press "A" on the primary controller (currently primary is always in your right hand) to reset and calibrate the Oculus
-            if (VRCenter.VREnabled && controllerRight.GetButtonDown(Buttons.START))
+            if (VRCenter.VREnabled && controllerRight.GetButtonDown(Buttons.START))         // Moved to Player.Think; used with Controls. TODO: Move control stuff in Player.Think to Controls.cs
             {
                 VRCenter.Recenter();
             }
 
-            if(controllerLeft.GetButton(Buttons.BUMPER) && controllerRight.GetButton(Buttons.BUMPER))
+            if(controllerLeft.GetButton(Buttons.BUMPER) && controllerRight.GetButton(Buttons.BUMPER))       // Moved to Player.Think; used with Controls. TODO: Move control stuff in Player.Think to Controls.cs
             {
                 CalibrateShoulderPositions();
                 handGrip.position = transform.TransformPoint(controllerRight.Position + rightCalibOffset);
             }
 
-            if (controllerLeft.GetButton(Buttons.JOYSTICK) && controllerRight.GetButton(Buttons.JOYSTICK))
+            if (controllerLeft.GetButton(Buttons.JOYSTICK) && controllerRight.GetButton(Buttons.JOYSTICK))      // Moved to Player.Think; used with Controls. TODO: Move control stuff in Player.Think to Controls.cs
             {
                 CalibrateUserArmLength();
             }
 
-            anim.SetFloat("Forward", controllerLeft.JoystickY);
-            transform.Rotate(new Vector3(0, -3f* (Mathf.Rad2Deg * Mathf.Acos(controllerRight.JoystickX)-90f)/180f, 0));
+            anim.SetFloat("Forward", controllerLeft.JoystickY);         // Moved to Actor.Act, Player.CheckMovementInput
+            transform.Rotate(new Vector3(0, -3f* (Mathf.Rad2Deg * Mathf.Acos(controllerRight.JoystickX)-90f)/180f, 0));     // Moved to Actor.Act, Player.CheckMovementInput
 
-            Vector3 calculatedGripPosition = transform.TransformPoint(controllerRight.Position + rightCalibOffset);
-            Vector3 rightArmPos = anim.GetBoneTransform(HumanBodyBones.RightUpperArm).position;
-            Vector3 rightArmOffset = calculatedGripPosition - rightArmPos;
+            Vector3 calculatedGripPosition = transform.TransformPoint(controllerRight.Position + rightCalibOffset);     // Moved to Actor.MoveDominantHand, Player.UpdateDominantHand
+            Vector3 rightArmPos = anim.GetBoneTransform(HumanBodyBones.RightUpperArm).position;         // Moved to Actor.MoveDominantHand
+            Vector3 rightArmOffset = calculatedGripPosition - rightArmPos;          // Moved to Actor.MoveDominantHand
 
-            if (rightArmOffset.magnitude > armLength)
+            if (rightArmOffset.magnitude > armLength)       // Moved to Actor.MoveDominantHand; I suppose it goes there. It's really only intended for the player but whatever
             {
                 calculatedGripPosition = rightArmPos + (armLength / rightArmOffset.magnitude) * rightArmOffset;
             }
 
-            targetA.localRotation = controllerRight.Rotation;
-            targetA.Rotate(gripFineTuneRotOffset);
-            targetA.Rotate(saberHandGripRotOffset);
+            targetA.localRotation = controllerRight.Rotation;       // Moved to Actor._UpdateDominantHand
+            targetA.Rotate(gripFineTuneRotOffset);          // Moved to Player._UpdateDominantHand
+            targetA.Rotate(saberHandGripRotOffset);         // Moved to Player._UpdateDominantHand
 
-            Vector3 moveOffset = calculatedGripPosition - rbSaber.position;
-            Vector3 partialMove = Vector3.Lerp(rbSaber.position, calculatedGripPosition, collisionPrevention);
-            rbSaber.MovePosition(partialMove);
-            _saberErrorDist = moveOffset.magnitude;
+            Vector3 moveOffset = calculatedGripPosition - rbSaber.position;         // Moved to Actor.MoveDominantHand
+            Vector3 partialMove = Vector3.Lerp(rbSaber.position, calculatedGripPosition, collisionPrevention);          // Moved to Actor.MoveDominantHand
+            rbSaber.MovePosition(partialMove);          // Moved to Actor.MoveDominantHand
+            _saberErrorDist = moveOffset.magnitude;     // Moved to Actor.MoveDominantHand, Player.Feedback
 
-            rbSaber.MoveRotation(Quaternion.Lerp(rbSaber.rotation, targetA.rotation, collisionPrevention));
+            rbSaber.MoveRotation(Quaternion.Lerp(rbSaber.rotation, targetA.rotation, collisionPrevention));         // Moved to Actor.MoveDominantHand
 
-            float errorAngle = Mathf.Abs(Quaternion.Angle(rbSaber.rotation, targetA.rotation));
+            float errorAngle = Mathf.Abs(Quaternion.Angle(rbSaber.rotation, targetA.rotation));     // Moved to Actor.MoveDominantHand
             
-            errorAngle -= rumbleCutoff;
+            errorAngle -= rumbleCutoff;         // Moved to Player.Feedback
             
-            _saberErrorDist += Mathf.Clamp(errorAngle / rumbleRange, 0, 0.5f)*2f;
+            _saberErrorDist += Mathf.Clamp(errorAngle / rumbleRange, 0, 0.5f)*2f;       // Moved to Player.Feedback
             
-            hand.position = transform.rotation * (controllerLeft.Position + leftCalibOffset) + transform.position;
+            hand.position = transform.rotation * (controllerLeft.Position + leftCalibOffset) + transform.position;      // Moved to Actor.MoveNonDominantHand, Player._UpdateNonDominantHand
 
-            Vector3 leftArmPos = anim.GetBoneTransform(HumanBodyBones.LeftUpperArm).position;
-            Vector3 leftArmOffset = hand.position - leftArmPos;
+            Vector3 leftArmPos = anim.GetBoneTransform(HumanBodyBones.LeftUpperArm).position;       // Moved to Player._UpdateNonDominantHand
+            Vector3 leftArmOffset = hand.position - leftArmPos;         // Moved to Player._UpdateNonDominantHand
 
-            if (leftArmOffset.magnitude > armLength)
+            if (leftArmOffset.magnitude > armLength)        // Moved to Player._UpdateNonDominantHand
             {
                 hand.position = leftArmPos + (armLength / leftArmOffset.magnitude) * leftArmOffset;
             }
 
-            hand.localRotation = controllerLeft.Rotation;
-            hand.Rotate(handRotOffset);
+            hand.localRotation = controllerLeft.Rotation;       // Moved to Actor.MoveNonDominantHand, Player._UpdateNonDominantHand
+            hand.Rotate(handRotOffset);         // Moved to Player._UpdateNonDominantHand
         }
 
         void OnAnimatorIK()         // Moved to Player; used with animation

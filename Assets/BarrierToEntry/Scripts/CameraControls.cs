@@ -8,7 +8,7 @@ namespace BarrierToEntry
     {
 
         public Transform camTrans;
-        public PlayerControls controls;
+        public Player player;
 
         // Mouse sensitivity
         public float horizontalSpeed = 4.0F;
@@ -29,20 +29,18 @@ namespace BarrierToEntry
             float rotationX = h * Time.deltaTime;
             float rotationY = v * Time.deltaTime;
 
-            if(controls.InputCheck())
+            if(player.controls.InputCheck())
             {
-                rotationY = verticalSpeed * controls.controllerRight.JoystickY*Time.deltaTime;
+                rotationY = verticalSpeed * player.controls.controllerRight.JoystickY*Time.deltaTime;
             }
 
             if (Application.platform == RuntimePlatform.WindowsPlayer)
             {
-                camTrans.Rotate(-rotationY, rotationX, 0);
-                camTrans.rotation = Quaternion.Euler(new Vector3(camTrans.rotation.eulerAngles.x, camTrans.rotation.eulerAngles.y, 0));
+                camTrans.Rotate(new Vector3(-rotationY / verticalSpeed * 40f, rotationX / horizontalSpeed * 40f, 0));
             }
             if (Application.platform == RuntimePlatform.WindowsEditor)
             {
-                camTrans.Rotate(-rotationY / verticalSpeed * 40f, rotationX / horizontalSpeed * 40f, 0);
-                camTrans.rotation = Quaternion.Euler(new Vector3(camTrans.rotation.eulerAngles.x, camTrans.rotation.eulerAngles.y, 0));
+                camTrans.Rotate(new Vector3(-rotationY / verticalSpeed * 40f, rotationX / horizontalSpeed * 40f, 0));
             }
         }
     }
