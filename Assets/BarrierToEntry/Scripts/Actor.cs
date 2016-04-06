@@ -41,8 +41,9 @@ namespace BarrierToEntry
         {
             config = new ActorConfig(this);
             config.GenerateArmLength();
-            Physics.IgnoreCollision(collider, weapon.collider);
+            
             weapon.rb.centerOfMass = weapon.rb.transform.InverseTransformPoint(weapon.saberCoM.position);
+            Physics.IgnoreCollision(collider, weapon.collider);
         }
 
         protected abstract void Think();

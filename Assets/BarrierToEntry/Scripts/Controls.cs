@@ -38,6 +38,20 @@ namespace BarrierToEntry
             return controllerLeft != null && controllerRight != null;
         }
 
+        public bool Recenter {
+            get { return controllerRight.GetButtonDown(Buttons.START); }
+        }
+
+        public bool CalibrateShoulder
+        {
+            get { return controllerLeft.GetButton(Buttons.BUMPER) && controllerRight.GetButton(Buttons.BUMPER); }
+        }
+
+        public bool CalibrateUserArmLength
+        {
+            get { return controllerLeft.GetButton(Buttons.JOYSTICK) && controllerRight.GetButton(Buttons.JOYSTICK); }
+        }
+
         public Vector3 GetRealPosition(Controller side)
         {
             return _GetRealPosition((side == Controller.RIGHT) ? controllerRight : controllerLeft);

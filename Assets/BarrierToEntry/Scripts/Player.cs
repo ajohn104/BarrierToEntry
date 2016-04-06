@@ -33,35 +33,43 @@ namespace BarrierToEntry
         void Start()
         {
             _config = new PlayerConfig(this);
-            controls = new Controls(device);
-            Physics.IgnoreCollision(collider, weapon.collider);
-            weapon.rb.centerOfMass = weapon.rb.transform.InverseTransformPoint(weapon.saberCoM.position);
-            config.GenerateArmLength();
+            _config.GenerateArmLength();
             _config.GenerateHandSize();
+
+            controls = new Controls(device);
+            weapon.rb.centerOfMass = weapon.rb.transform.InverseTransformPoint(weapon.saberCoM.position);
+            Physics.IgnoreCollision(collider, weapon.collider);
         }
 
         protected override void Think()     // TODO: Move control stuff in Player.Think to Controls.cs
         {
             if (!controls.InputCheck()) return;
-            // Face screen with Rift and press "A" on the primary controller (currently primary is always in your right hand) to reset and calibrate the Oculus
-            if (VRCenter.VREnabled && controls.controllerRight.GetButtonDown(SixenseCore.Buttons.START))
-            {
-                VRCenter.Recenter();
-            }
-
-            if (controls.controllerLeft.GetButton(SixenseCore.Buttons.BUMPER) && controls.controllerRight.GetButton(SixenseCore.Buttons.BUMPER))
-            {
-                _config.CalibrateShoulderPositions();
-                weapon.transform.position = transform.TransformPoint(controls.controllerRight.Position + _config.rightCalibOffset);
-            }
-
-            if (controls.controllerLeft.GetButton(SixenseCore.Buttons.JOYSTICK) && controls.controllerRight.GetButton(SixenseCore.Buttons.JOYSTICK))
-            {
-                _config.CalibrateUserArmLength();
-            }
+            CheckRecenter();
+            CheckCalibrateShoulder();
+            CheckCalibrateUserArmLength();
             CheckMovementInput();
+
             _UpdateDominantHand();
             _UpdateNonDominantHand();
+        }
+
+        private void CheckRecenter()
+        {
+            if (VRCenter.VREnabled && controls.Recenter) { VRCenter.Recenter(); }
+        }
+
+        private void CheckCalibrateShoulder()
+        {
+            if (controls.CalibrateShoulder)
+            {
+                _config.CalibrateShoulderPositions();
+                weapon.transform.position = transform.TransformPoint(controls.controllerRight.Position + _config.rightCalibOffset); // TODO: make this relativeness a method in _config
+            }
+        }
+
+        private void CheckCalibrateUserArmLength()
+        {
+            if (controls.CalibrateUserArmLength) { _config.CalibrateUserArmLength(); }
         }
 
         protected override void Feedback(float errorOffset, float errorAngle)
@@ -80,7 +88,6 @@ namespace BarrierToEntry
         protected override void _UpdateNonDominantHand()
         {
             this.NonDominantHandPos = controls.controllerLeft.Position + _config.leftCalibOffset;
-
             this.NonDominantHandRot = controls.controllerLeft.Rotation * Quaternion.Euler(weapon.HandRotOffset);
         }
 

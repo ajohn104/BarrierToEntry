@@ -19,6 +19,7 @@ namespace BarrierToEntry
         public void GenerateHandSize()
         {
             // Temporarily disabled. TODO: Find out if this is helpful.
+            // Update: Pretty sure it's helpful for keeping your hands out of your shoulders, but not for getting them to touch...tips.
             //handDist = Vector3.Distance(owner.anim.GetBoneTransform(HumanBodyBones.RightHand).position, anim.GetBoneTransform(HumanBodyBones.RightMiddleProximal).position) / 2f;
         }
 
