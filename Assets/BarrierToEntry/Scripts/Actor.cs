@@ -25,6 +25,11 @@ namespace BarrierToEntry
         protected Quaternion DominantHandRot;   // Currently not used. weapon.target.transform is used instead
         protected Quaternion NonDominantHandRot;
 
+        private readonly Vector3 HandGripIKOffset = new Vector3(0, -180, -90);
+        private readonly Vector3 handIKOffset = new Vector3(-90, 180, 0);
+
+        public ModelDesigner modelDesign;
+
         protected void GenerateMoveSpeed(float positionForward, float positionStrafe)
         {
             throw new NotSupportedException("TODO: Implement Actor.GenerateMoveSpeed");
@@ -44,6 +49,8 @@ namespace BarrierToEntry
             
             weapon.rb.centerOfMass = weapon.rb.transform.InverseTransformPoint(weapon.saberCoM.position);
             Physics.IgnoreCollision(collider, weapon.collider);
+
+            modelDesign.Prepare();
         }
 
         protected abstract void Think();
@@ -122,6 +129,20 @@ namespace BarrierToEntry
         /// </summary>
         protected abstract void _UpdateNonDominantHand();
 
+        void OnAnimatorIK()
+        {
+            Quaternion computedRot = Quaternion.Euler(weapon.transform.rotation.eulerAngles) * Quaternion.Euler(HandGripIKOffset);
+            Quaternion computedRot2 = Quaternion.Euler(hand.rotation.eulerAngles) * Quaternion.Euler(handIKOffset) * transform.rotation;
 
+            anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1.0f);
+            anim.SetIKRotationWeight(AvatarIKGoal.RightHand, 1.0f);
+            anim.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1.0f);
+            anim.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1.0f);
+
+            anim.SetIKPosition(AvatarIKGoal.RightHand, weapon.transform.position);
+            anim.SetIKRotation(AvatarIKGoal.RightHand, computedRot);
+            anim.SetIKPosition(AvatarIKGoal.LeftHand, hand.position);
+            anim.SetIKRotation(AvatarIKGoal.LeftHand, computedRot2);
+        }
     }
 }

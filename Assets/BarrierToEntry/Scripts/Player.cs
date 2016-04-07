@@ -7,8 +7,7 @@ namespace BarrierToEntry
 {
     public class Player : Actor
     {
-        private readonly Vector3 HandGripIKOffset = new Vector3(0, -180, -90);
-        private readonly Vector3 handIKOffset = new Vector3(-90, 180, 0);
+        
         private readonly Vector3 GripFineTuneRotOffset = new Vector3(-30, 0, 0);
 
         public Controls controls;
@@ -39,8 +38,11 @@ namespace BarrierToEntry
             controls = new Controls(device);
             weapon.rb.centerOfMass = weapon.rb.transform.InverseTransformPoint(weapon.saberCoM.position);
             Physics.IgnoreCollision(collider, weapon.collider);
-        }
 
+            modelDesign.Prepare();
+            
+        }
+        
         protected override void Think()     // TODO: Move control stuff in Player.Think to Controls.cs
         {
             if (!controls.InputCheck()) return;
@@ -51,6 +53,8 @@ namespace BarrierToEntry
 
             _UpdateDominantHand();
             _UpdateNonDominantHand();
+            
+            //if (controls.controllerRight.GetButtonDown(Buttons.TRIGGER)) ModelGenerator.RandomizeModel(this);
         }
 
         private void CheckRecenter()
@@ -96,22 +100,6 @@ namespace BarrierToEntry
             this.MoveSpeedForward = controls.controllerLeft.JoystickY;
             this.RotationSpeedHoriz = controls.controllerRight.JoystickX;
             this.DominantHandPos = controls.controllerRight.Position + _config.rightCalibOffset;     // TODO: Make all this shit dependent on dominant/nondominant hand (use enums, prob)
-        }
-
-        void OnAnimatorIK()
-        {
-            Quaternion computedRot = Quaternion.Euler(weapon.transform.rotation.eulerAngles) * Quaternion.Euler(HandGripIKOffset);
-            Quaternion computedRot2 = Quaternion.Euler(hand.rotation.eulerAngles) * Quaternion.Euler(handIKOffset) * transform.rotation;
-
-            anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1.0f);
-            anim.SetIKRotationWeight(AvatarIKGoal.RightHand, 1.0f);
-            anim.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1.0f);
-            anim.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1.0f);
-
-            anim.SetIKPosition(AvatarIKGoal.RightHand, weapon.transform.position);
-            anim.SetIKRotation(AvatarIKGoal.RightHand, computedRot);
-            anim.SetIKPosition(AvatarIKGoal.LeftHand, hand.position);
-            anim.SetIKRotation(AvatarIKGoal.LeftHand, computedRot2);
         }
 
         void OnDrawGizmos()

@@ -23,17 +23,19 @@ namespace BarrierToEntry
         void Start()
         {
             config = new ActorConfig(this);
+            config.GenerateArmLength();
+
+            weapon.rb.centerOfMass = weapon.rb.transform.InverseTransformPoint(weapon.saberCoM.position);
+            Physics.IgnoreCollision(collider, weapon.collider);
+            modelDesign.Prepare();
+            ModelGenerator.RandomizeModel(this);
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
-
+        int iffy = 0;
         protected override void Think()
         {
-            throw new NotImplementedException();
+            this.DominantHandPos = new Vector3(0.151f, 1.139f, 0.562f);
+            weapon.target.localRotation = Quaternion.Euler(new Vector3(0, 180, 0));
         }
 
         protected override void _UpdateDominantHand()

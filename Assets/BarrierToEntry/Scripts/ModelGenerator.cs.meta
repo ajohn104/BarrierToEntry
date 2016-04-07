@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: aeacff54ae5613140978dc2e11d3dbc2
+timeCreated: 1460056598
+licenseType: Free
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - def_scientist: {fileID: 2800000, guid: c594894cb8fde50469f052393bf00d4a, type: 3}
+  - scifi_alt_black: {fileID: 2800000, guid: a6adce34c0da8c1498ea9139db3ec9bb, type: 3}
+  executionOrder: -99
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
