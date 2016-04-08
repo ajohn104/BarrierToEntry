@@ -16,15 +16,8 @@ namespace BarrierToEntry
         private PlayerConfig _config;
         public override ActorConfig config
         {
-            get
-            {
-                return _config;
-            }
-
-            set
-            {
-                _config = (PlayerConfig) value;
-            }
+            get { return _config; }
+            set { _config = (PlayerConfig) value; }
         }
 
 

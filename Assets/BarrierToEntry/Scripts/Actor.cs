@@ -11,6 +11,8 @@ namespace BarrierToEntry
         public Rigidbody rb;        // TODO: USE THIS. Maybe. I don't knpw for sure that anim responds to physics.
         public Saber weapon;
         public new Collider collider;
+        public Team team = Team.NONE;
+        public Team enemyTeam = Team.NONE;
         public virtual ActorConfig config
         {
             get; set;
@@ -104,7 +106,23 @@ namespace BarrierToEntry
             throw new NotSupportedException("TODO: Implement Actor.Move better than Actor.Act does that meshes well with it");
         }
 
-
+        protected Actor FindClosestEnemy()
+        {
+            if (enemyTeam.members.Length == 0) return null;
+            Actor closest = enemyTeam.members[0];
+            float closestDist = Vector3.Distance(closest.transform.position, this.transform.position);
+            foreach(Actor enemy in enemyTeam.members)
+            {
+                float dist = Vector3.Distance(enemy.transform.position, this.transform.position);
+                if (dist < closestDist)
+                {
+                    closest = enemy;
+                    closestDist = dist;
+                }
+            }
+            return closest;
+        }
+        
         // Note, the extra script space here is in case of extra necessary massaging, not to do what Actor.Move* do.
         protected void UpdateDominantHand()
         {

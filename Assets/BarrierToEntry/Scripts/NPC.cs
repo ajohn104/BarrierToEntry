@@ -9,14 +9,8 @@ namespace BarrierToEntry
         private ActorConfig _config;
         public override ActorConfig config
         {
-            get
-            {
-                return _config;
-            }
-            set
-            {
-                _config = value;
-            }
+            get { return _config; }
+            set { _config = value; }
         }
 
         // Use this for initialization
@@ -34,14 +28,20 @@ namespace BarrierToEntry
         int iffy = 0;
         protected override void Think()
         {
-            this.DominantHandPos = new Vector3(0.151f, 1.139f, 0.562f);
-            weapon.target.localRotation = Quaternion.Euler(new Vector3(0, 180, 0));
+            //if (++iffy%100 == 0) ModelGenerator.RandomizeModel(this);
+            ConsiderTactics();
+            _UpdateDominantHand();   
         }
 
         protected override void _UpdateDominantHand()
         {
-            //weapon.target.localRotation = thought and stuff
-            throw new NotImplementedException();
+            this.DominantHandPos = new Vector3(0.151f, 1.139f, 0.562f);
+            weapon.target.localRotation = Quaternion.Euler(new Vector3(0, 180, 0));
+        }
+
+        protected void ConsiderTactics()
+        {
+            // Nada for now...
         }
 
         protected override void _UpdateNonDominantHand()
