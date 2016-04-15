@@ -33,7 +33,7 @@ namespace BarrierToEntry
             Physics.IgnoreCollision(collider, weapon.collider);
 
             modelDesign.Prepare();
-            
+            _observer = new Observer(this);
         }
         
         protected override void Think()     // TODO: Move control stuff in Player.Think to Controls.cs
@@ -42,6 +42,8 @@ namespace BarrierToEntry
             CheckRecenter();
             CheckCalibrateShoulder();
             CheckCalibrateUserArmLength();
+            CheckChangeBeamColorUp();
+            CheckChangeBeamColorDown();
             CheckMovementInput();
 
             _UpdateDominantHand();
@@ -95,6 +97,28 @@ namespace BarrierToEntry
             this.DominantHandPos = controls.controllerRight.Position + _config.rightCalibOffset;     // TODO: Make all this shit dependent on dominant/nondominant hand (use enums, prob)
         }
 
+        private int currentSaberColor = 5;
+
+        private void CheckChangeBeamColorUp()
+        {
+            if(controls.ChangeBeamColorUp)
+            {
+                currentSaberColor++;
+                currentSaberColor %= ModelGenerator.beamColors.Length;
+                modelDesign.SetColor(BodyPart.BEAM, ModelGenerator.beamColors[currentSaberColor]);
+            }
+        }
+
+        private void CheckChangeBeamColorDown()
+        {
+            if (controls.ChangeBeamColorDown)
+            {
+                currentSaberColor--;
+                if(currentSaberColor < 0) { currentSaberColor = ModelGenerator.beamColors.Length - 1; }
+                modelDesign.SetColor(BodyPart.BEAM, ModelGenerator.beamColors[currentSaberColor]);
+            }
+        }
+
         void OnDrawGizmos()
         {
             if (controls == null || !controls.InputCheck()) return;
@@ -102,6 +126,22 @@ namespace BarrierToEntry
             Gizmos.DrawLine(weapon.transform.position, weapon.transform.position + weapon.target.up);
 
             Gizmos.DrawSphere(transform.TransformPoint(controls.controllerRight.Position + _config.rightCalibOffset), 0.01f);
+        }
+
+        void OnAnimatorIK()
+        {
+            Quaternion computedRot = Quaternion.Euler(weapon.transform.rotation.eulerAngles) * Quaternion.Euler(HandGripIKOffset);
+            Quaternion computedRot2 = Quaternion.Euler(hand.rotation.eulerAngles) * Quaternion.Euler(handIKOffset) * transform.rotation;
+
+            anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1.0f);
+            anim.SetIKRotationWeight(AvatarIKGoal.RightHand, 1.0f);
+            anim.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1.0f);
+            anim.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1.0f);
+
+            anim.SetIKPosition(AvatarIKGoal.RightHand, weapon.transform.position);
+            anim.SetIKRotation(AvatarIKGoal.RightHand, computedRot);
+            anim.SetIKPosition(AvatarIKGoal.LeftHand, hand.position);
+            anim.SetIKRotation(AvatarIKGoal.LeftHand, computedRot2);
         }
     }
 }

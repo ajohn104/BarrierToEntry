@@ -31,7 +31,15 @@ namespace BarrierToEntry
 
             if(player.controls.InputCheck())
             {
+                if(Application.platform == RuntimePlatform.WindowsPlayer) Cursor.visible = false;
                 rotationY = verticalSpeed * player.controls.controllerRight.JoystickY*Time.deltaTime;
+                rotationX = 0;
+            }
+
+            if (VRCenter.VREnabled)
+            {
+                rotationY = 0;
+                rotationX = 0;
             }
 
             if (Application.platform == RuntimePlatform.WindowsPlayer)

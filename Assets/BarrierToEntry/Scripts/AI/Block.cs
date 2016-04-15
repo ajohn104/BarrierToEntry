@@ -5,17 +5,9 @@ namespace BarrierToEntry
 {
     public class Block : Action
     {
-
-        // Use this for initialization
-        void Start()
+        public Block(NPC actor) : base(actor)
         {
-
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
+            this.owner = actor;
         }
     }
 }

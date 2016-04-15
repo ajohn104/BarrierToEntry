@@ -77,7 +77,7 @@ namespace BarrierToEntry
         public static readonly Color BEAM_ORANGE = ModelDesigner.rgb(255, 128, 0);
         public static readonly Color BEAM_PURPLE = ModelDesigner.rgb(102, 0, 204);
 
-        private static readonly Color[] beamColors = new Color[] { BEAM_PINK, BEAM_RED, BEAM_ORANGE, BEAM_YELLOW, BEAM_YODA, BEAM_BLUE, BEAM_PURPLE };
+        public static readonly Color[] beamColors = new Color[] { BEAM_PINK, BEAM_RED, BEAM_ORANGE, BEAM_YELLOW, BEAM_YODA, BEAM_BLUE, BEAM_PURPLE };
 
         public static Texture DEFAULT_SCIENTIST;
         public static Texture SCIFI_BLACK;

@@ -23,14 +23,25 @@ namespace BarrierToEntry
         protected float RotationSpeedHoriz;
 
         protected Vector3 DominantHandPos;
+        public Vector3 domhandpos
+        {
+            set { DominantHandPos = value; }
+            get { return DominantHandPos; }
+        }
         protected Vector3 NonDominantHandPos;
         protected Quaternion DominantHandRot;   // Currently not used. weapon.target.transform is used instead
         protected Quaternion NonDominantHandRot;
 
-        private readonly Vector3 HandGripIKOffset = new Vector3(0, -180, -90);
-        private readonly Vector3 handIKOffset = new Vector3(-90, 180, 0);
+        protected readonly Vector3 HandGripIKOffset = new Vector3(0, -180, -90);
+        protected readonly Vector3 handIKOffset = new Vector3(-90, 180, 0);
 
         public ModelDesigner modelDesign;
+
+        protected Observer _observer;
+        public Observer observer
+        {
+            get { return _observer; }
+        }
 
         protected void GenerateMoveSpeed(float positionForward, float positionStrafe)
         {
@@ -40,6 +51,7 @@ namespace BarrierToEntry
         // Update is called once per frame
         void Update()
         {
+            _observer.observe();
             Think();
             Act();
         }
@@ -53,6 +65,7 @@ namespace BarrierToEntry
             Physics.IgnoreCollision(collider, weapon.collider);
 
             modelDesign.Prepare();
+            _observer = new Observer(this);
         }
 
         protected abstract void Think();
@@ -60,7 +73,7 @@ namespace BarrierToEntry
         private void Act()
         {
             anim.SetFloat("Forward", MoveSpeedForward);
-            transform.Rotate(new Vector3(0, -3f * (Mathf.Rad2Deg * Mathf.Acos(RotationSpeedHoriz) - 90f) / 180f, 0));        // TODO: Make this better. I think this is geared for a thumbstick
+            transform.Rotate(new Vector3(0, -3f * (Mathf.Rad2Deg * RotationSpeedHoriz * -8f) / 180f, 0));        // TODO: Make this better. I think this is geared for a thumbstick
             MoveDominantHand();
             MoveNonDominantHand();
         }
@@ -147,20 +160,6 @@ namespace BarrierToEntry
         /// </summary>
         protected abstract void _UpdateNonDominantHand();
 
-        void OnAnimatorIK()
-        {
-            Quaternion computedRot = Quaternion.Euler(weapon.transform.rotation.eulerAngles) * Quaternion.Euler(HandGripIKOffset);
-            Quaternion computedRot2 = Quaternion.Euler(hand.rotation.eulerAngles) * Quaternion.Euler(handIKOffset) * transform.rotation;
-
-            anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1.0f);
-            anim.SetIKRotationWeight(AvatarIKGoal.RightHand, 1.0f);
-            anim.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1.0f);
-            anim.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1.0f);
-
-            anim.SetIKPosition(AvatarIKGoal.RightHand, weapon.transform.position);
-            anim.SetIKRotation(AvatarIKGoal.RightHand, computedRot);
-            anim.SetIKPosition(AvatarIKGoal.LeftHand, hand.position);
-            anim.SetIKRotation(AvatarIKGoal.LeftHand, computedRot2);
-        }
+        
     }
 }

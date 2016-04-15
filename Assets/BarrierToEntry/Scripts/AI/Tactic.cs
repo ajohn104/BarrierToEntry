@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace BarrierToEntry
 {
-    public class Tactic 
+    public abstract class Tactic 
     {
         protected NPC owner;
 
@@ -11,5 +11,7 @@ namespace BarrierToEntry
         {
             this.owner = actor;
         }
+
+        public abstract void Perform();
     }
 }

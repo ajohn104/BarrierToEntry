@@ -9,5 +9,10 @@ namespace BarrierToEntry
         {
             this.owner = actor;
         }
+
+        public override void Perform()
+        {
+
+        }
     }
 }

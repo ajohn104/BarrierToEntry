@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: feb7d92cd7bac9d43a8fd55564451026
-timeCreated: 1458092538
+timeCreated: 1460502027
 licenseType: Free
 SubstanceImporter:
   serializedVersion: 5
@@ -8,6 +8,7 @@ SubstanceImporter:
   - serializedVersion: 16
     name: Pavement_Path
     prototypeName: Pavement_Path
+    shaderName: 
     shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
     shaderKeywords: _NORMALMAP _PARALLAXMAP
     renderQueue: -1
@@ -43,7 +44,7 @@ SubstanceImporter:
         texture: {instanceID: 0}
     - name: Normal
       value:
-        scalar[0]: .5
+        scalar[0]: 0.5
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
@@ -57,7 +58,7 @@ SubstanceImporter:
         texture: {instanceID: 0}
     - name: Saturation
       value:
-        scalar[0]: .5
+        scalar[0]: 0.5
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
@@ -71,14 +72,14 @@ SubstanceImporter:
         texture: {instanceID: 0}
     - name: Angle
       value:
-        scalar[0]: .125
+        scalar[0]: 0.125
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
         texture: {instanceID: 0}
     - name: Luminosity
       value:
-        scalar[0]: .5
+        scalar[0]: 0.5
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
@@ -106,7 +107,7 @@ SubstanceImporter:
         texture: {instanceID: 0}
     - name: Sharpen
       value:
-        scalar[0]: .5
+        scalar[0]: 0.5
         scalar[1]: 0
         scalar[2]: 0
         scalar[3]: 0
@@ -121,7 +122,7 @@ SubstanceImporter:
     materialInformation:
       serializedVersion: 5
       offset: {x: 0, y: 0}
-      scale: {x: 100, y: 100}
+      scale: {x: 1, y: 1}
       generateMipmaps: 1
       generateAllOutputs: 0
       animationUpdateRate: 0
@@ -133,14 +134,14 @@ SubstanceImporter:
             name: _MainTex
           second:
             texture: {instanceID: 0}
-            scale: {x: 100, y: 100}
+            scale: {x: 1, y: 1}
             offset: {x: 0, y: 0}
         data:
           first:
             name: _BumpMap
           second:
             texture: {instanceID: 0}
-            scale: {x: 100, y: 10}
+            scale: {x: 1, y: 100}
             offset: {x: 0, y: 0}
         data:
           first:
@@ -151,17 +152,17 @@ SubstanceImporter:
             offset: {x: 0, y: 0}
         data:
           first:
+            name: _ParallaxMap
+          second:
+            texture: {instanceID: 0}
+            scale: {x: 1, y: 100}
+            offset: {x: 0, y: 0}
+        data:
+          first:
             name: _MetallicGlossMap
           second:
             texture: {instanceID: 0}
             scale: {x: 1, y: 1}
-            offset: {x: 0, y: 0}
-        data:
-          first:
-            name: _ParallaxMap
-          second:
-            texture: {instanceID: 0}
-            scale: {x: 100, y: 10}
             offset: {x: 0, y: 0}
         data:
           first:
@@ -175,7 +176,7 @@ SubstanceImporter:
             name: _EmissionMap
           second:
             texture: {instanceID: 0}
-            scale: {x: 100, y: 100}
+            scale: {x: 1, y: 1}
             offset: {x: 0, y: 0}
         data:
           first:
@@ -203,7 +204,11 @@ SubstanceImporter:
         data:
           first:
             name: _Cutoff
-          second: .5
+          second: 0.5
+        data:
+          first:
+            name: _Parallax
+          second: 0.02
         data:
           first:
             name: _ZWrite
@@ -211,7 +216,7 @@ SubstanceImporter:
         data:
           first:
             name: _Glossiness
-          second: .5
+          second: 0.5
         data:
           first:
             name: _Metallic
@@ -220,10 +225,6 @@ SubstanceImporter:
           first:
             name: _BumpScale
           second: 1
-        data:
-          first:
-            name: _Parallax
-          second: .0199999996
         data:
           first:
             name: _OcclusionStrength

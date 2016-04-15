@@ -57,7 +57,9 @@ namespace BarrierToEntry
                 newMembers[i] = _members[i];
             }
             newMembers[newMembers.Length - 1] = actor;
+            _members = newMembers;
             actor.team = this;
+            actor.enemyTeam = this.enemyTeam;
         }
 
         private void RemoveMember(Actor actor)
@@ -75,6 +77,7 @@ namespace BarrierToEntry
             }
             _members = newMembers;
             actor.team = NONE;
+            actor.enemyTeam = NONE;
         }
     }
 }

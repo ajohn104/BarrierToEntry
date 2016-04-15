@@ -52,6 +52,16 @@ namespace BarrierToEntry
             get { return controllerLeft.GetButton(Buttons.JOYSTICK) && controllerRight.GetButton(Buttons.JOYSTICK); }
         }
 
+        public bool ChangeBeamColorUp
+        {
+            get { return controllerRight.GetButtonDown(Buttons.X); }
+        }
+
+        public bool ChangeBeamColorDown
+        {
+            get { return controllerRight.GetButtonDown(Buttons.B); }
+        }
+
         public Vector3 GetRealPosition(Controller side)
         {
             return _GetRealPosition((side == Controller.RIGHT) ? controllerRight : controllerLeft);
@@ -61,5 +71,7 @@ namespace BarrierToEntry
         {
             return con.Position * device.m_worldUnitScaleInMillimeters;
         }
+
+        
     }
 }

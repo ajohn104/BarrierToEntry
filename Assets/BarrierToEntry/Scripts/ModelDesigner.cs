@@ -10,6 +10,7 @@ namespace BarrierToEntry {
         public Renderer hairRenderer;
         public Renderer beamRenderer;
         public Renderer beamCapRenderer;
+        public Light light;
 
         private Material eyes;
         private Material hair;
@@ -18,6 +19,8 @@ namespace BarrierToEntry {
         private Material equipment;
         private Material beam;
         private Material beamCap;
+
+        
 
         public void Prepare() {
             Material[] mats = bodyRenderer.materials;
@@ -86,6 +89,7 @@ namespace BarrierToEntry {
                 Color.RGBToHSV(col, out hue, out sat, out val);
                 beam.SetColor("_EmissionColor", Color.HSVToRGB(hue, 0.7720589f, 5f, true));
                 beamCap.SetColor("_EmissionColor", Color.HSVToRGB(hue, 0.7720589f, 5f, true));
+                light.color = col;
             }
             else {
                 GetMat(part).color = col;

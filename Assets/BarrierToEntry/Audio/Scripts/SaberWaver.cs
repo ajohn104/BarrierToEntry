@@ -8,25 +8,17 @@ namespace BarrierToEntry
     public class SaberWaver : MonoBehaviour
     {
         // un-optimized version
-        public double frequency = 440;
-        public double gain = 0.05;
+        public float scale = 2f;
+        public Player player;
 
-        private double increment;
-        private double phase;
-        private double sampling_frequency = 48000;
+        private int time = 0;
 
         void OnAudioFilterRead(float[] data, int channels)
         {
-            // update increment in case frequency has changed
-            increment = frequency * 2 * Math.PI / sampling_frequency;
-            for (var i = 0; i < data.Length; i = i + channels)
+            if (player.observer == null) return;
+            for (int i = 0; i < data.Length; i++)
             {
-                phase = phase + increment;
-                // this is where we copy audio data to make them “available” to Unity
-                data[i] = (float)(gain * Math.Sin(phase));
-                // if we have stereo, we copy the mono data to each channel
-                if (channels == 2) data[i + 1] = data[i];
-                if (phase > 2 * Math.PI) phase = 0;
+                data[i] *= Mathf.Lerp(1f, 5f, player.observer.AverageRotationalSpeed * scale);
             }
         }
     }
