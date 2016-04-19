@@ -10,7 +10,7 @@ namespace BarrierToEntry {
         public Renderer hairRenderer;
         public Renderer beamRenderer;
         public Renderer beamCapRenderer;
-        public Light light;
+        public new Light light;
 
         private Material eyes;
         private Material hair;

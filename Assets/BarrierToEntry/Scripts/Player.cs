@@ -93,6 +93,7 @@ namespace BarrierToEntry
         protected void CheckMovementInput()
         {
             this.MoveSpeedForward = controls.controllerLeft.JoystickY;
+            this.MoveSpeedStrafe = controls.controllerLeft.JoystickX;
             this.RotationSpeedHoriz = controls.controllerRight.JoystickX;
             this.DominantHandPos = controls.controllerRight.Position + _config.rightCalibOffset;     // TODO: Make all this shit dependent on dominant/nondominant hand (use enums, prob)
         }

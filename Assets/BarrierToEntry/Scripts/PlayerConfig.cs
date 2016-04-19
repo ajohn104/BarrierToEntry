@@ -24,7 +24,7 @@ namespace BarrierToEntry
         }
 
         // This is for position calibration, and the user will press their hands to the front of their shoulders.
-        public void CalibrateShoulderPositions()
+        public void CalibrateShoulderPositions()        // Inverted hand position during calibration; now expects arms to be crossed
         {
             if (!owner.controls.InputCheck()) return;
             Transform root = owner.anim.transform;
@@ -34,11 +34,11 @@ namespace BarrierToEntry
             Vector3 bodyOffset = Vector3.forward * handDist;
 
             // TODO: Clean this shit up. Perhaps move part of it to controls, or another class entirely. I'm just not sure it belongs in PlayerConfig. But...maybe it does.
-            rightCalibOffset = owner.transform.InverseTransformPoint(rightArm.position) + bodyOffset - owner.controls.controllerRight.Position;
-            leftCalibOffset = owner.transform.InverseTransformPoint(leftArm.position) + bodyOffset - owner.controls.controllerLeft.Position;
+            rightCalibOffset = owner.transform.InverseTransformPoint(rightArm.position) + bodyOffset - owner.controls.controllerLeft.Position;
+            leftCalibOffset = owner.transform.InverseTransformPoint(leftArm.position) + bodyOffset - owner.controls.controllerRight.Position;
 
-            realLeftShoulderPos = owner.controls.GetRealPosition(Controller.LEFT);
-            realRightShoulderPos = owner.controls.GetRealPosition(Controller.RIGHT);
+            realLeftShoulderPos = owner.controls.GetRealPosition(Controller.RIGHT);
+            realRightShoulderPos = owner.controls.GetRealPosition(Controller.LEFT);
         }
 
         // In this test, the user must fully extend their arms in any direction, and the system will 

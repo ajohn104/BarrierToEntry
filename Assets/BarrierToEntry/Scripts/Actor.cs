@@ -20,7 +20,9 @@ namespace BarrierToEntry
 
         protected float MoveSpeedForward;
         protected float MoveSpeedStrafe;
+        protected const float MaxMoveSpeed = 5f;
         protected float RotationSpeedHoriz;
+        protected const float MaxTurnSpeed = 150f;      // Initial acception. Pending user approval.
 
         protected Vector3 DominantHandPos;
         public Vector3 domhandpos
@@ -49,7 +51,7 @@ namespace BarrierToEntry
         }
 
         // Update is called once per frame
-        void Update()
+        void FixedUpdate()
         {
             _observer.observe();
             Think();
@@ -73,7 +75,9 @@ namespace BarrierToEntry
         private void Act()
         {
             anim.SetFloat("Forward", MoveSpeedForward);
-            transform.Rotate(new Vector3(0, -3f * (Mathf.Rad2Deg * RotationSpeedHoriz * -8f) / 180f, 0));        // TODO: Make this better. I think this is geared for a thumbstick
+            anim.SetFloat("Strafe", MoveSpeedStrafe);
+            rb.MovePosition(transform.TransformPoint(new Vector3(MoveSpeedStrafe, 0f, MoveSpeedForward) * MaxMoveSpeed * Time.deltaTime));
+            transform.Rotate(new Vector3(0, RotationSpeedHoriz * MaxTurnSpeed * Time.deltaTime, 0));        // TODO: Make this better. I think this is geared for a thumbstick
             MoveDominantHand();
             MoveNonDominantHand();
         }

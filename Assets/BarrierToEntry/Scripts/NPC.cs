@@ -55,7 +55,7 @@ namespace BarrierToEntry
                 newRot.z = 0;
                 Quaternion newQuat = Quaternion.Lerp(transform.rotation, Quaternion.Euler(newRot), Time.fixedDeltaTime * 8f);
                 float offset = newQuat.eulerAngles.y - transform.rotation.eulerAngles.y;
-                this.RotationSpeedHoriz = offset/2f;
+                this.RotationSpeedHoriz = Mathf.Clamp(offset/2f, -1f, 1f);
             }
             
             tactics.EvaluateNextMove();
