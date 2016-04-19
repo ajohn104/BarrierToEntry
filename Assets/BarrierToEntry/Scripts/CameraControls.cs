@@ -9,6 +9,7 @@ namespace BarrierToEntry
 
         public Transform camTrans;
         public Player player;
+        public Transform headTrans;
 
         // Mouse sensitivity
         public float horizontalSpeed = 4.0F;
@@ -41,6 +42,8 @@ namespace BarrierToEntry
                 rotationY = 0;
                 rotationX = 0;
             }
+
+            headTrans.rotation = Quaternion.Euler(new Vector3(0f, player.transform.rotation.eulerAngles.y, 0f));
 
             if (Application.platform == RuntimePlatform.WindowsPlayer)
             {
