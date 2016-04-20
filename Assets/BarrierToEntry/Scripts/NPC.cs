@@ -54,7 +54,7 @@ namespace BarrierToEntry
                 newRot.x = 0;
                 newRot.z = 0;
                 Quaternion newQuat = Quaternion.Lerp(transform.rotation, Quaternion.Euler(newRot), Time.fixedDeltaTime * 8f);
-                float offset = newQuat.eulerAngles.y - transform.rotation.eulerAngles.y;
+                float offset = (Quaternion.Inverse(newQuat) * transform.rotation).eulerAngles.y - 180f;//newQuat.eulerAngles.y - transform.rotation.eulerAngles.y;
                 this.RotationSpeedHoriz = Mathf.Clamp(offset/2f, -1f, 1f);
             }
             
@@ -82,6 +82,8 @@ namespace BarrierToEntry
             anim.SetIKRotation(AvatarIKGoal.RightHand, computedRot);
             anim.SetIKPosition(AvatarIKGoal.LeftHand, hand.position);
             anim.SetIKRotation(AvatarIKGoal.LeftHand, computedRot2);
+
+            // Still need to put non-dom hand on weapon.
             
             if (tactics.currentTarget != null)
             {

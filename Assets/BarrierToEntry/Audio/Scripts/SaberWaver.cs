@@ -9,16 +9,18 @@ namespace BarrierToEntry
     {
         // un-optimized version
         public float scale = 2f;
-        public Player player;
+        public Actor actor;
+        public new AudioSource audio;
 
         private int time = 0;
 
         void OnAudioFilterRead(float[] data, int channels)
         {
-            if (player.observer == null) return;
+            if (actor.observer == null) return;
+            
             for (int i = 0; i < data.Length; i++)
             {
-                data[i] *= Mathf.Lerp(1f, 5f, player.observer.AverageRotationalSpeed * scale);
+                data[i] *= Mathf.Lerp(1f, 5f, actor.observer.AverageRotationalSpeed * scale);
             }
         }
     }

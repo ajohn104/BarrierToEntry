@@ -62,6 +62,14 @@ namespace BarrierToEntry {
             }
         }
 
+        public Quaternion IdealBlockRotation
+        {
+            get
+            {
+                return Quaternion.LookRotation(owner.weapon.transform.up, -owner.weapon.transform.right);
+            }
+        }
+
         /// <summary>
         /// Provides the last few recorded rotations, 0 as most recent.
         /// </summary>

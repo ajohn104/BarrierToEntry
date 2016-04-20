@@ -21,8 +21,9 @@ namespace BarrierToEntry
             Observer obs = enemy.observer;
 
             owner.domhandpos = enemy.domhandpos;    // Tracks enemy for testing purposes. Will change when I get the math right.
-            
-            owner.weapon.target.localRotation = enemy.weapon.target.transform.localRotation;
+
+            float oldZ = owner.weapon.target.localEulerAngles.z;
+            owner.weapon.target.localRotation = Quaternion.Inverse(owner.transform.rotation)*enemy.observer.IdealBlockRotation;//enemy.weapon.target.transform.localRotation;
 
         }
     }
