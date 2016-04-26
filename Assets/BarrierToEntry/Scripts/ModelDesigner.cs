@@ -86,13 +86,114 @@ namespace BarrierToEntry {
                 float hue = 0f;
                 float sat = 0f;
                 float val = 0f;
-                Color.RGBToHSV(col, out hue, out sat, out val);
-                beam.SetColor("_EmissionColor", Color.HSVToRGB(hue, 0.7720589f, 5f, true));
-                beamCap.SetColor("_EmissionColor", Color.HSVToRGB(hue, 0.7720589f, 5f, true));
+                
+                Vector3 hsv = RGBtoHSV(col);
+                hue = hsv[0];
+                sat = hsv[1];
+                val = hsv[2];
+                Color rgbHDR = HSVToRGB(hue, 0.7720589f, 5f, true);
+                beam.SetColor("_EmissionColor", rgbHDR);
+                beamCap.SetColor("_EmissionColor", rgbHDR);
                 light.color = col;
             }
             else {
                 GetMat(part).color = col;
+            }
+        }
+
+        /// <summary>
+        /// Converts between RGB and HSV color values. Used to relax necessity for Unity 5.3 to 5.2
+        /// </summary>
+        /// <param name="col">the color to convert</param>
+        /// <returns>an hsv representation of the specified color</returns>
+        public static Vector3 RGBtoHSV(Color col)
+        {
+            float M = Mathf.Max(col.r, col.g, col.b);
+            float m = Mathf.Min(col.r, col.g, col.b);
+            float C = M - m;
+            float V = M;
+            float S = (C == 0) ? 0f : C / V;
+            
+            float H = 0f;
+            if(M == col.r)
+            {
+                H = ((col.g - col.b) / C) % 6f;
+            } else if (M == col.g)
+            {
+                H = (col.b - col.r) / C + 2f;
+            } else
+            {
+                H = (col.r - col.g) / C + 4f;
+            }
+            H *= 60f;
+            if (H < 0) H += 360f;
+            return new Vector3(H, S, V);
+        }
+
+        /// <summary>
+        /// Converts a hsv color value to an rgb color value. Used to relax necessity for Unity 5.3 to 5.2
+        /// Credit to http://www.easyrgb.com/index.php?X=MATH&H=21#text21 for majority of concept
+        /// </summary>
+        /// <param name="H">hue [0, 360)</param>
+        /// <param name="S">saturation [0, 1]</param>
+        /// <param name="V">value [0, inf)</param>
+        /// <param name="hdr">true for hdr values to be allowed</param>
+        /// <returns>an rgb representation of the given hsv color</returns>
+        public static Color HSVToRGB(float H, float S, float V, bool hdr)
+        {
+            if (S == 0f)
+                return new Color(V, V, V);
+            else if (V == 0f)
+                return Color.black;
+            else
+            {
+                Color col = Color.black;
+                float Hval = H / 60f;
+                int sel = Mathf.FloorToInt(Hval);
+                float mod = Hval - sel;
+                float v1 = V * (1f - S);
+                float v2 = V * (1f - S * mod);
+                float v3 = V * (1f - S * (1f - mod));
+                switch (sel)
+                {
+                    
+                    case 0:
+                        col.r = V;
+                        col.g = v3;
+                        col.b = v1;
+                        break;
+                    case 1:
+                        col.r = v2;
+                        col.g = V;
+                        col.b = v1;
+                        break;
+                    case 2:
+                        col.r = v1;
+                        col.g = V;
+                        col.b = v3;
+                        break;
+                    case 3:
+                        col.r = v1;
+                        col.g = v2;
+                        col.b = V;
+                        break;
+                    case 4:
+                        col.r = v3;
+                        col.g = v1;
+                        col.b = V;
+                        break;
+                    default:
+                        col.r = V;
+                        col.g = v1;
+                        col.b = v2;
+                        break;
+                }
+                if(!hdr) {
+                    col.r = Mathf.Clamp(col.r, 0f, 1f);
+                    col.g = Mathf.Clamp(col.g, 0f, 1f);
+                    col.b = Mathf.Clamp(col.b, 0f, 1f);
+                }
+                return col;
             }
         }
 
@@ -113,7 +214,5 @@ namespace BarrierToEntry {
         {
             clothes.mainTexture = texture;
         }
-
-
     }
 }

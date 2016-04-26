@@ -66,7 +66,15 @@ namespace BarrierToEntry {
         {
             get
             {
-                return Quaternion.LookRotation(owner.weapon.transform.up, -owner.weapon.transform.right);
+                return Quaternion.LookRotation(owner.weapon.transform.up, /*-owner.weapon.transform.right*/-Vector3.forward);
+            }
+        }
+
+        public Vector3 IdealBlockPosition
+        {
+            get
+            {
+                return owner.weapon.collider.gameObject.GetComponent<Renderer>().bounds.center;
             }
         }
 

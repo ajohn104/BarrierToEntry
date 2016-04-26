@@ -24,6 +24,16 @@ namespace BarrierToEntry
 
             float oldZ = owner.weapon.target.localEulerAngles.z;
             owner.weapon.target.localRotation = Quaternion.Inverse(owner.transform.rotation)*enemy.observer.IdealBlockRotation;//enemy.weapon.target.transform.localRotation;
+            Vector3 centerBeamPosFar = enemy.observer.IdealBlockPosition;
+            Vector3 shoulderOffset = centerBeamPosFar - owner.anim.GetBoneTransform(HumanBodyBones.RightUpperArm).position;
+
+            shoulderOffset = shoulderOffset.normalized * Mathf.Clamp(shoulderOffset.magnitude, 0f, owner.config.ArmLength/2);
+            Vector3 finalPos = shoulderOffset + owner.anim.GetBoneTransform(HumanBodyBones.RightUpperArm).position;
+
+            float offset = Vector3.Distance(owner.weapon.transform.position, owner.observer.IdealBlockPosition);
+            Vector3 posOffset = owner.weapon.target.rotation * (offset * Vector3.forward);
+            //finalPos -= posOffset;
+            owner.domhandpos = owner.transform.InverseTransformPoint(finalPos);
 
         }
     }

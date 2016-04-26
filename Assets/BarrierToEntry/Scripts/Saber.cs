@@ -7,7 +7,7 @@ namespace BarrierToEntry
     {
         public Actor owner;
         public Rigidbody rb;
-        public new Collider collider;
+        public new CapsuleCollider collider;
         public Transform target;
 
         public readonly Vector3 SaberHandGripRotOffset = new Vector3(-90, 180, 0);
