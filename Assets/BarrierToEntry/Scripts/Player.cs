@@ -72,6 +72,7 @@ namespace BarrierToEntry
             {
                 _config.CalibrateShoulderPositions();
                 weapon.transform.position = transform.TransformPoint(controls.controllerRight.Position + _config.rightCalibOffset); // TODO: make this relativeness a method in _config
+                if (VRCenter.VREnabled) { VRCenter.Recenter(); }
             }
         }
 

@@ -10,6 +10,8 @@ namespace BarrierToEntry
         public Transform camTrans;
         public Player player;
         public Transform headTrans;
+        public Transform RigTrans;
+        public Vector3 RigOffset = new Vector3(0f, 0.1483f, 0.0049f);
 
         // Mouse sensitivity
         public float horizontalSpeed = 4.0F;
@@ -52,6 +54,14 @@ namespace BarrierToEntry
             if (Application.platform == RuntimePlatform.WindowsEditor)
             {
                 camTrans.Rotate(new Vector3(-rotationY / verticalSpeed * 40f, rotationX / horizontalSpeed * 40f, 0));
+            }
+        }
+
+        void LateUpdate()
+        {
+            if(VRCenter.VREnabled)
+            {
+                RigTrans.localPosition = RigOffset - camTrans.localPosition;
             }
         }
     }

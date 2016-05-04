@@ -38,6 +38,8 @@ namespace BarrierToEntry
             return controllerLeft != null && controllerRight != null;
         }
 
+
+        // Integrating this with Calibrate Shoulder instead.
         public bool Recenter {
             get { return controllerRight.GetButtonDown(Buttons.START); }
         }
