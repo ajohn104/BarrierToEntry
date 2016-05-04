@@ -20,7 +20,7 @@ namespace BarrierToEntry
 
         protected float MoveSpeedForward;
         protected float MoveSpeedStrafe;
-        protected const float MaxMoveSpeed = 5f;
+        protected const float MaxMoveSpeed = 1f;
         protected float RotationSpeedHoriz;
         protected const float MaxTurnSpeed = 150f;      // Initial acception. Pending user approval.
 
@@ -44,6 +44,14 @@ namespace BarrierToEntry
         {
             get { return _observer; }
         }
+        
+        public GameObject DominantIK;
+        public GameObject NonDominantIK;
+
+        protected bool DominantHandAttached = true;
+        protected bool NonDominantHandAttached = true;
+
+        public bool Alive = true;
 
         protected void GenerateMoveSpeed(float positionForward, float positionStrafe)
         {
@@ -64,10 +72,11 @@ namespace BarrierToEntry
             config.GenerateArmLength();
             
             weapon.rb.centerOfMass = weapon.rb.transform.InverseTransformPoint(weapon.saberCoM.position);
-            Physics.IgnoreCollision(collider, weapon.collider);
+            // Physics.IgnoreCollision(collider, weapon.collider); // Instead, colliders will all be triggers, aside from the bottom collider that keeps them from falling through the floor.
 
             modelDesign.Prepare();
             _observer = new Observer(this);
+            DominantIK = weapon.gameObject;
         }
 
         protected abstract void Think();
@@ -82,8 +91,33 @@ namespace BarrierToEntry
             MoveNonDominantHand();
         }
 
+        public void Die()
+        {
+            Alive = false;
+            Debug.Log("I just died.");
+            // TODO: Implement. I'd imagine I'll just ragdoll the body. Or...something.
+        }
+
+        public void DisableHand(Hand side)
+        {
+            // TODO: Implement. It'll need some stuff to be messed with elsewhere, probably.
+            if(side == config.DominantHand )
+            {
+                if (!DominantHandAttached) return;
+                DominantHandAttached = false;
+                weapon.rb.useGravity = true;
+                DominantIK = weapon.target.gameObject;
+            } else
+            {
+                if (!NonDominantHandAttached) return;
+                NonDominantHandAttached = false;
+            }
+            // That might be all I need to do, honestly.
+        }
+
         void MoveDominantHand()
         {
+
             Vector3 calculatedGripPosition = transform.TransformPoint(DominantHandPos);
             Vector3 rightArmPos = anim.GetBoneTransform(HumanBodyBones.RightUpperArm).position;
             Vector3 rightArmOffset = calculatedGripPosition - rightArmPos;
@@ -91,6 +125,12 @@ namespace BarrierToEntry
             if (rightArmOffset.magnitude > config.ArmLength)       // Really only intended for the player but whatever
             {
                 calculatedGripPosition = rightArmPos + (config.ArmLength / rightArmOffset.magnitude) * rightArmOffset;
+            }
+
+            if (!DominantHandAttached)
+            {
+                weapon.target.position = calculatedGripPosition;
+                return;
             }
 
             Vector3 moveOffset = calculatedGripPosition - weapon.rb.position;
@@ -104,6 +144,7 @@ namespace BarrierToEntry
 
         void MoveNonDominantHand()
         {
+            //if (!NonDominantHandAttached) return; // Not sure I need it... we'll see what IK tries to do if the hand is disabled.
             hand.position = transform.rotation * (NonDominantHandPos) + transform.position;
 
             hand.localRotation = NonDominantHandRot;

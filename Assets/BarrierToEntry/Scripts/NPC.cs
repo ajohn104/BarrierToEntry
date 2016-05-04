@@ -27,6 +27,7 @@ namespace BarrierToEntry
             ModelGenerator.RandomizeModel(this);
             tactics = new AITactics(this);
             _observer = new Observer(this);
+            DominantIK = weapon.gameObject;
         }
 
         int iffy = 0;
@@ -70,7 +71,7 @@ namespace BarrierToEntry
 
         void OnAnimatorIK()
         {
-            Quaternion computedRot = Quaternion.Euler(weapon.transform.rotation.eulerAngles) * Quaternion.Euler(HandGripIKOffset);
+            Quaternion computedRot = Quaternion.Euler(DominantIK.transform.rotation.eulerAngles) * Quaternion.Euler(HandGripIKOffset);
             Quaternion computedRot2 = Quaternion.Euler(hand.rotation.eulerAngles) * Quaternion.Euler(handIKOffset) * transform.rotation;
 
             anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1.0f);
@@ -78,7 +79,7 @@ namespace BarrierToEntry
             anim.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1.0f);
             anim.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1.0f);
 
-            anim.SetIKPosition(AvatarIKGoal.RightHand, weapon.transform.position);
+            anim.SetIKPosition(AvatarIKGoal.RightHand, DominantIK.transform.position);
             anim.SetIKRotation(AvatarIKGoal.RightHand, computedRot);
             anim.SetIKPosition(AvatarIKGoal.LeftHand, hand.position);
             anim.SetIKRotation(AvatarIKGoal.LeftHand, computedRot2);

@@ -72,6 +72,10 @@ namespace BarrierToEntry
             return con.Position * device.m_worldUnitScaleInMillimeters;
         }
 
+        public bool DisplaySaberTransform
+        {
+            get { return controllerRight.GetButtonDown(Buttons.Y); }
+        }
         
     }
 }

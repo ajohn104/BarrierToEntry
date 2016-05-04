@@ -3,9 +3,16 @@ using System.Collections;
 
 namespace BarrierToEntry
 {
+
+    public enum Hand
+    {
+        Left, Right
+    }
+    
     public class ActorConfig
     {
         protected Actor owner;
+        public Hand DominantHand = Hand.Right;
 
         public float ArmLength = 0f;
         private readonly HumanBodyBones[] rightArmBones = new HumanBodyBones[] {

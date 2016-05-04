@@ -38,7 +38,7 @@ namespace BarrierToEntry
             }
         }
         
-        public bool isSameTeam(Actor a, Actor b)
+        public static bool isSameTeam(Actor a, Actor b)
         {
             return a.team != NONE && b.team != NONE && a.team == b.team;
         }

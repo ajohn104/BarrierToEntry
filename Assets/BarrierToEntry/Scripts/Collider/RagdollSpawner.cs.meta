@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 25d881b241b47fe4e92787881f34dac8
+timeCreated: 1461882197
+licenseType: Free
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - ragdoll: {fileID: 107366, guid: 9a6a32a80bd7ad34d85896f6f4c2a2a4, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

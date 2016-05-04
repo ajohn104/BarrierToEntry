@@ -30,26 +30,35 @@ namespace BarrierToEntry
 
             controls = new Controls(device);
             weapon.rb.centerOfMass = weapon.rb.transform.InverseTransformPoint(weapon.saberCoM.position);
-            Physics.IgnoreCollision(collider, weapon.collider);
+            //Physics.IgnoreCollision(collider, weapon.collider);
 
             modelDesign.Prepare();
             _observer = new Observer(this);
+            DominantIK = weapon.gameObject;
         }
         
         protected override void Think()     // TODO: Move control stuff in Player.Think to Controls.cs
         {
             if (!controls.InputCheck()) return;
+            Debug.Log("running");
             CheckRecenter();
             CheckCalibrateShoulder();
             CheckCalibrateUserArmLength();
             CheckChangeBeamColorUp();
             CheckChangeBeamColorDown();
             CheckMovementInput();
+            
 
             _UpdateDominantHand();
             _UpdateNonDominantHand();
             
             //if (controls.controllerRight.GetButtonDown(Buttons.TRIGGER)) ModelGenerator.RandomizeModel(this);
+        }
+
+        public void LateUpdate()
+        {
+            if (!controls.InputCheck()) return;
+            CheckDisplaySaberTransform();
         }
 
         private void CheckRecenter()
@@ -120,6 +129,15 @@ namespace BarrierToEntry
             }
         }
 
+        private void CheckDisplaySaberTransform()
+        {
+            if(controls.DisplaySaberTransform) {
+                Debug.Log("The current weapon position is: " + Vector3.zero);
+                Debug.Log("The current weapon rotation is: " + Vector3.zero);
+                Debug.Log("=====================================================================");
+            }
+        }
+
         void OnDrawGizmos()
         {
             if (controls == null || !controls.InputCheck()) return;
@@ -131,7 +149,7 @@ namespace BarrierToEntry
 
         void OnAnimatorIK()
         {
-            Quaternion computedRot = Quaternion.Euler(weapon.transform.rotation.eulerAngles) * Quaternion.Euler(HandGripIKOffset);
+            Quaternion computedRot = Quaternion.Euler(DominantIK.transform.rotation.eulerAngles) * Quaternion.Euler(HandGripIKOffset);
             Quaternion computedRot2 = Quaternion.Euler(hand.rotation.eulerAngles) * Quaternion.Euler(handIKOffset) * transform.rotation;
 
             anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1.0f);
@@ -139,7 +157,7 @@ namespace BarrierToEntry
             anim.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1.0f);
             anim.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1.0f);
 
-            anim.SetIKPosition(AvatarIKGoal.RightHand, weapon.transform.position);
+            anim.SetIKPosition(AvatarIKGoal.RightHand, DominantIK.transform.position);
             anim.SetIKRotation(AvatarIKGoal.RightHand, computedRot);
             anim.SetIKPosition(AvatarIKGoal.LeftHand, hand.position);
             anim.SetIKRotation(AvatarIKGoal.LeftHand, computedRot2);
