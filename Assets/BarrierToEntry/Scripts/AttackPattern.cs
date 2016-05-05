@@ -4,7 +4,7 @@ using System;
 
 namespace BarrierToEntry
 {
-    public class AttackPattern : MonoBehaviour
+    public class AttackPattern
     {
         public const int LEFT_TO_RIGHT = 0;
         public const int RIGHT_TO_LEFT = 1;
@@ -21,8 +21,8 @@ namespace BarrierToEntry
                 new Vector3[] { new Vector3(), new Vector3(), new Vector3(), new Vector3(), new Vector3() }
             );
         private static AttackPattern rightLeft = new AttackPattern(
-                new Vector3[] { new Vector3(), new Vector3(), new Vector3(), new Vector3(), new Vector3() },
-                new Vector3[] { new Vector3(), new Vector3(), new Vector3(), new Vector3(), new Vector3() }
+                new Vector3[] { new Vector3(0.8f, 1.6f, 0f), new Vector3(0.5f, 1.4f, 0.4f), new Vector3(-0.1f, 1.3f, 0.3f), new Vector3(-0.3f, 1.3f, 0.1f)},
+                new Vector3[] { new Vector3(353.2f, 241.4f, 55.9f), new Vector3(313.3f, 141.1f, 73.9f), new Vector3(298.4f, 65.9f, 76.2f), new Vector3(285f, 174.4f, 245.2f)}
             );
         private static AttackPattern topDown = new AttackPattern(
                 new Vector3[] { new Vector3(), new Vector3(), new Vector3(), new Vector3(), new Vector3() },
@@ -63,8 +63,8 @@ namespace BarrierToEntry
         public Vector3 GetExpectedPosition(float time)
         {
             lastTime = time;
-            float startI = Mathf.Floor(((positions.Length - 1) * time) / attackTime);
-            float endI = startI + 1f;
+            float startI = Mathf.Clamp(Mathf.Floor(((positions.Length - 1) * time) / attackTime), 0f, positions.Length - 1);
+            float endI = Mathf.Clamp(startI + 1f, 0f, positions.Length-1);
             float startT = ((attackTime * startI) / (positions.Length - 1));
             float endT = ((attackTime * endI) / (positions.Length - 1));
             float dt = ((time - startT) / (endT - startT));
@@ -74,8 +74,8 @@ namespace BarrierToEntry
         public Vector3 GetExpectedRotation(float time)
         {
             lastTime = time;
-            float startI = Mathf.Floor(((positions.Length - 1) * time) / attackTime);
-            float endI = startI + 1f;
+            float startI = Mathf.Clamp(Mathf.Floor(((rotations.Length - 1) * time) / attackTime), 0f, rotations.Length - 1);
+            float endI = Mathf.Clamp(startI + 1f, 0f, rotations.Length - 1);
             float startT = ((attackTime * startI) / (positions.Length - 1));
             float endT = ((attackTime * endI) / (positions.Length - 1));
             float dt = ((time - startT) / (endT - startT));

@@ -40,14 +40,12 @@ namespace BarrierToEntry
         protected override void Think()     // TODO: Move control stuff in Player.Think to Controls.cs
         {
             if (!controls.InputCheck()) return;
-            Debug.Log("running");
             CheckRecenter();
             CheckCalibrateShoulder();
             CheckCalibrateUserArmLength();
             CheckChangeBeamColorUp();
             CheckChangeBeamColorDown();
             CheckMovementInput();
-            
 
             _UpdateDominantHand();
             _UpdateNonDominantHand();
@@ -133,8 +131,8 @@ namespace BarrierToEntry
         private void CheckDisplaySaberTransform()
         {
             if(controls.DisplaySaberTransform) {
-                Debug.Log("The current weapon position is: " + Vector3.zero);
-                Debug.Log("The current weapon rotation is: " + Vector3.zero);
+                Debug.Log("The current weapon position is: " + DominantHandPos);
+                Debug.Log("The current weapon rotation is: " + weapon.target.localRotation.eulerAngles);
                 Debug.Log("=====================================================================");
             }
         }

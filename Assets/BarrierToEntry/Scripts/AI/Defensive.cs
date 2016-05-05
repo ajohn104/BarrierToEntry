@@ -9,7 +9,6 @@ namespace BarrierToEntry
         public Defensive(NPC actor) : base(actor) {
             this.owner = actor;
             block = new Block(owner);
-            Debug.Log("Going defensive");
         }
         
         public override void Perform()

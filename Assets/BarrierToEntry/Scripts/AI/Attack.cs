@@ -18,7 +18,7 @@ namespace BarrierToEntry
         {
             
             if(pattern.isDone()) {
-                return false;
+                return true;
             }
             if(!owner.weapon.collisionHandler.inBlock) time += Time.fixedDeltaTime;
             Vector3 pos = pattern.GetExpectedPosition(time);
@@ -27,7 +27,7 @@ namespace BarrierToEntry
             owner.weapon.target.localRotation = Quaternion.Euler(rot);
             owner.domhandpos = pos;
 
-            return true;
+            return false;
         }
     }
 }

@@ -8,7 +8,6 @@ namespace BarrierToEntry
         public Offensive(NPC actor) : base(actor)
         {
             this.owner = actor;
-            Debug.Log("Going offensive");
         }
 
         Attack attack;

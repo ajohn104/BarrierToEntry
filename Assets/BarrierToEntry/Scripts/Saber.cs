@@ -26,17 +26,5 @@ namespace BarrierToEntry
 
 
         /* TODO: Add a position and rotation property in here for ease of access. It would make more sense, too. When reading certain lines of code. */
-
-        // Use this for initialization
-        void Start()
-        {
-
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
     }
 }
