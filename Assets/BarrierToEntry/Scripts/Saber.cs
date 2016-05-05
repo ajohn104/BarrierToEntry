@@ -9,6 +9,7 @@ namespace BarrierToEntry
         public Rigidbody rb;
         public new CapsuleCollider collider;
         public Transform target;
+        public Transform NonDomHand;
 
         public readonly Vector3 SaberHandGripRotOffset = new Vector3(-90, 180, 0);
         public readonly Vector3 HandRotOffset = new Vector3(180, 90, 90);

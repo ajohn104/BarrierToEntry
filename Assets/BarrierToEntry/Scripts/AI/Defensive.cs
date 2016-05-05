@@ -1,11 +1,27 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 namespace BarrierToEntry
 {
     public class Defensive : Tactic
     {
         private Block block;
+
+        private float _reactionTime = 0f;
+        protected override float reactionTime
+        {
+            get
+            {
+                return _reactionTime;
+            }
+
+            set
+            {
+                _reactionTime = value;
+            }
+        }
+
         public Defensive(NPC actor) : base(actor) {
             this.owner = actor;
             block = new Block(owner);
@@ -13,6 +29,7 @@ namespace BarrierToEntry
         
         public override void Perform()
         {
+            timePassed += Time.fixedDeltaTime;
             // This probably should go in block but right now I don't care.
             Vector3 blockPosition = Vector3.zero;
             Quaternion blockRotation = Quaternion.Euler(Vector3.zero);

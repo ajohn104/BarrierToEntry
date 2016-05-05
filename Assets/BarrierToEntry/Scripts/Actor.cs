@@ -20,7 +20,7 @@ namespace BarrierToEntry
 
         protected float MoveSpeedForward;
         protected float MoveSpeedStrafe;
-        protected const float MaxMoveSpeed = 1f;
+        protected const float MaxMoveSpeed = 5f;
         protected float RotationSpeedHoriz;
         protected const float MaxTurnSpeed = 100f;      // Initial acception. Pending user approval.
 
@@ -51,11 +51,26 @@ namespace BarrierToEntry
         protected bool DominantHandAttached = true;
         protected bool NonDominantHandAttached = true;
 
+        public Vector2 LocalMoveSpeed
+        {
+            set {
+                MoveSpeedStrafe = value.x;
+                MoveSpeedForward = value.y;
+            }
+        }
+
         public bool Alive = true;
 
-        protected void GenerateMoveSpeed(float positionForward, float positionStrafe)
+        public static Vector2 GenerateMoveSpeed(Vector3 localOffset, float minDist)
         {
-            throw new NotSupportedException("TODO: Implement Actor.GenerateMoveSpeed");
+            Vector2 offset = new Vector2(localOffset.x, localOffset.z);
+            float dist = offset.magnitude;
+            
+            float altDist = Mathf.Clamp(dist - minDist, 0f, dist);
+            float moveSpeed = altDist < MaxMoveSpeed * Time.fixedDeltaTime ? altDist / Time.fixedDeltaTime : MaxMoveSpeed ;
+            moveSpeed = Mathf.Clamp01(moveSpeed);
+            moveSpeed = dist < minDist ? 0f : moveSpeed;
+            return offset.normalized * moveSpeed;
         }
 
         // Update is called once per frame
@@ -83,10 +98,11 @@ namespace BarrierToEntry
 
         private void Act()
         {
+            
             anim.SetFloat("Forward", MoveSpeedForward);
             anim.SetFloat("Strafe", MoveSpeedStrafe);
-            rb.MovePosition(transform.TransformPoint(new Vector3(MoveSpeedStrafe, 0f, MoveSpeedForward) * MaxMoveSpeed * Time.deltaTime));
-            transform.Rotate(new Vector3(0, RotationSpeedHoriz * MaxTurnSpeed * Time.deltaTime, 0));        // TODO: Make this better. I think this is geared for a thumbstick
+            rb.MovePosition(transform.TransformPoint(new Vector3(MoveSpeedStrafe, 0f, MoveSpeedForward) * MaxMoveSpeed * Time.fixedDeltaTime));
+            transform.Rotate(new Vector3(0, RotationSpeedHoriz * MaxTurnSpeed * Time.fixedDeltaTime, 0));        // TODO: Make this better. I think this is geared for a thumbstick
             MoveDominantHand();
             MoveNonDominantHand();
         }
@@ -101,11 +117,9 @@ namespace BarrierToEntry
             DisableHand(Hand.Left);
             DisableHand(Hand.Right);
             Ragdoll();
-
             Alive = false;
-            Debug.Log("I just died.");
             
-            // TODO: Implement. I'd imagine I'll just ragdoll the body. Or...something.
+            // TODO: Fully ragdoll the body, then also add a game over state for player (or just let them respawn because who cares).
         }
 
         private void Ragdoll()
@@ -131,6 +145,7 @@ namespace BarrierToEntry
             {
                 if (!NonDominantHandAttached) return;
                 NonDominantHandAttached = false;
+                weapon.NonDomHand = anim.GetBoneTransform(side == Hand.Right ? HumanBodyBones.RightHand : HumanBodyBones.LeftHand); // Eh, it'll get the job done at least.
             }
             // That might be all I need to do, honestly.
         }
@@ -200,7 +215,12 @@ namespace BarrierToEntry
             }
             return closest;
         }
-        
+
+        public static float Distance(Actor a, Actor b)
+        {
+            return Vector3.Distance(a.transform.position, b.transform.position);
+        }
+
         // Note, the extra script space here is in case of extra necessary massaging, not to do what Actor.Move* do.
         protected void UpdateDominantHand()
         {

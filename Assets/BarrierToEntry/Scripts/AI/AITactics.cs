@@ -8,7 +8,12 @@ namespace BarrierToEntry
         private NPC owner;
         private Tactic currentTactic;
         public Actor currentTarget;
-        
+
+        public const float MIN_DIST = 1.1f;
+        private const float AttackDelay = 2f;
+        private float lastAttackTime = 0f;
+        private const float MAX_ATTACK_DIST = 1.4f;
+
         public AITactics(NPC actor)
         {
             this.owner = actor;
@@ -22,21 +27,35 @@ namespace BarrierToEntry
 
         private void DecideTactic()
         {
+            if (currentTactic != null && !currentTactic.CanReact()) return;
+
             DecideTarget();
             if (CheckForDanger())
             {
-                if (currentTactic == null || (currentTactic.GetType() != typeof(Defensive)))
+                if (currentTactic == null || !(currentTactic is Defensive))
                 {
                     currentTactic = new Defensive(this.owner);
                 }
             }
             else
             {
-                if (currentTactic == null || (currentTactic.GetType() != typeof(Offensive)))
+                if ((currentTactic == null || !(currentTactic is Offensive)) && lastAttackTime >= AttackDelay && TargetWithinRange)
                 {
                     currentTactic = new Offensive(this.owner);
+                    lastAttackTime = 0f;
                 }
             }
+            if(currentTactic == null)
+            {
+                // Go into ready stance, eventually
+                currentTactic = new Defensive(this.owner);
+                // but honestly this is fine for now.
+            }
+        }
+
+        private bool TargetWithinRange
+        {
+            get { return Actor.Distance(owner, currentTarget) <= MAX_ATTACK_DIST; }
         }
 
         /// <summary>
@@ -50,20 +69,12 @@ namespace BarrierToEntry
 
             if (currentTarget.GetType() == typeof(Player))
             {
-                Vector3[] lastPos = currentTarget.observer.lastPositions;
-                string s = "";
-                for (int i = 0; i < lastPos.Length - 1; i++ )
-                {
-                    s += ", " + (lastPos[i] - lastPos[i + 1]);
-                }
-                //Debug.Log(s);
+                //Vector3[] lastPos = currentTarget.observer.lastPositions; // currently not used. It doesn't really contribute enough to an attack to be worth checking
 
                 Quaternion[] lastRot = currentTarget.observer.lastRotations;
                 float angleSum = 0f;
-                string s2 = "";
-                for (int j = 0; j < lastPos.Length - 1; j++)
+                for (int j = 0; j < lastRot.Length - 1; j++)
                 {
-                    s2 += ", " + (lastRot[j].eulerAngles - lastRot[j + 1].eulerAngles);
                     angleSum += Quaternion.Angle(lastRot[j], lastRot[j + 1]);
                 }
                 
@@ -71,6 +82,16 @@ namespace BarrierToEntry
             }
 
             return false;
+        }
+
+        private void MoveTowardTarget()
+        {
+            if (Actor.Distance(owner, currentTarget) < MIN_DIST)
+            {
+                owner.LocalMoveSpeed = Vector2.zero;
+                return;
+            }
+            owner.LocalMoveSpeed = Actor.GenerateMoveSpeed(owner.transform.InverseTransformPoint(currentTarget.transform.position), MIN_DIST);
         }
 
         /// <summary>
@@ -113,11 +134,19 @@ namespace BarrierToEntry
         /// </summary>
         private void PerformTactic()
         {
+            MoveTowardTarget();
             currentTactic.Perform();
-            if(currentTactic is Offensive && ((Offensive)currentTactic).isDone)
+            if(currentTactic is Offensive)
             {
-                currentTactic = null;
+                if (((Offensive)currentTactic).isDone)
+                {
+                    currentTactic = null;
+                }
+            } else
+            {
+                lastAttackTime += Time.fixedDeltaTime;
             }
+            
         }
     }
 }

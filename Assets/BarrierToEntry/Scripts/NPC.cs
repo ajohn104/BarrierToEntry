@@ -72,7 +72,7 @@ namespace BarrierToEntry
         void OnAnimatorIK()
         {
             Quaternion computedRot = Quaternion.Euler(DominantIK.transform.rotation.eulerAngles) * Quaternion.Euler(HandGripIKOffset);
-            Quaternion computedRot2 = Quaternion.Euler(hand.rotation.eulerAngles) * Quaternion.Euler(handIKOffset) * transform.rotation;
+            Quaternion computedRot2 = Quaternion.Euler(hand.rotation.eulerAngles) * Quaternion.Euler(handIKOffset) * Quaternion.Euler(-90f * Vector3.forward + 90f * Vector3.left);//* transform.rotation;
 
             anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1.0f);
             anim.SetIKRotationWeight(AvatarIKGoal.RightHand, 1.0f);
@@ -81,7 +81,8 @@ namespace BarrierToEntry
 
             anim.SetIKPosition(AvatarIKGoal.RightHand, DominantIK.transform.position);
             anim.SetIKRotation(AvatarIKGoal.RightHand, computedRot);
-            anim.SetIKPosition(AvatarIKGoal.LeftHand, hand.position);
+            
+            anim.SetIKPosition(AvatarIKGoal.LeftHand, weapon.NonDomHand.position);
             anim.SetIKRotation(AvatarIKGoal.LeftHand, computedRot2);
 
             // Still need to put non-dom hand on weapon.
