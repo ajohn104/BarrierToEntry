@@ -20,6 +20,7 @@ namespace BarrierToEntry
             set { _config = (PlayerConfig) value; }
         }
 
+        
 
         // Use this for initialization
         void Start()
@@ -36,8 +37,8 @@ namespace BarrierToEntry
             _observer = new Observer(this);
             DominantIK = weapon.gameObject;
         }
-        
-        protected override void Think()     // TODO: Move control stuff in Player.Think to Controls.cs
+
+        public void Update()
         {
             if (!controls.InputCheck()) return;
             CheckRecenter();
@@ -46,9 +47,23 @@ namespace BarrierToEntry
             CheckChangeBeamColorUp();
             CheckChangeBeamColorDown();
             CheckMovementInput();
+            // CheckStopTime();     // Only necessary for making screenshots easier to produce, really.
+        }
+        
+        protected override void Think()     // TODO: Move control stuff in Player.Think to Controls.cs
+        {
+            if (!controls.InputCheck()) return;
+            /*CheckRecenter();
+            CheckCalibrateShoulder();
+            CheckCalibrateUserArmLength();
+            CheckChangeBeamColorUp();
+            CheckChangeBeamColorDown();
+            CheckMovementInput();*/
 
             _UpdateDominantHand();
             _UpdateNonDominantHand();
+
+            
             
             //if (controls.controllerRight.GetButtonDown(Buttons.TRIGGER)) ModelGenerator.RandomizeModel(this);
         }
@@ -134,6 +149,16 @@ namespace BarrierToEntry
                 Debug.Log("The current weapon position is: " + DominantHandPos);
                 Debug.Log("The current weapon rotation is: " + weapon.target.localRotation.eulerAngles);
                 Debug.Log("=====================================================================");
+            }
+        }
+
+        bool timePaused = false;
+        private void CheckStopTime()
+        {
+            if (controls.StopTime)
+            {
+                timePaused = !timePaused;
+                Time.timeScale = (timePaused) ? 0f : 1f;
             }
         }
 

@@ -78,6 +78,11 @@ namespace BarrierToEntry
         {
             get { return controllerRight.GetButtonDown(Buttons.Y); }
         }
+
+        public bool StopTime
+        {
+            get { return controllerRight.GetButtonDown(Buttons.A); }
+        }
         
     }
 }
