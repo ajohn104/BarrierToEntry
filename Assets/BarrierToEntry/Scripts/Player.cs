@@ -36,6 +36,7 @@ namespace BarrierToEntry
             modelDesign.Prepare();
             _observer = new Observer(this);
             DominantIK = weapon.gameObject;
+            Time.timeScale = 0;
         }
 
         public void Update()
@@ -50,6 +51,8 @@ namespace BarrierToEntry
             CheckObjectThrow();
             CheckGrab();
             CheckReleaseGrab();
+            CheckResetLevel();
+            CheckEndGame();
             // CheckStopTime();     // Only necessary for making screenshots easier to produce, really.
         }
         
@@ -79,6 +82,7 @@ namespace BarrierToEntry
                 _config.CalibrateShoulderPositions();
                 weapon.transform.position = transform.TransformPoint(controls.controllerRight.Position + _config.rightCalibOffset); // TODO: make this relativeness a method in _config
                 if (VRCenter.VREnabled) { VRCenter.Recenter(); }
+                Time.timeScale = 1f;
             }
         }
 
@@ -235,6 +239,22 @@ namespace BarrierToEntry
 
                 InGrab = false;
                 heldObjects = new Rigidbody[0];
+            }
+        }
+
+        void CheckResetLevel()
+        {
+            if(controls.ResetLevel)
+            {
+                UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+            }
+        }
+
+        void CheckEndGame()
+        {
+            if(controls.EndGame)
+            {
+                Application.Quit();
             }
         }
 

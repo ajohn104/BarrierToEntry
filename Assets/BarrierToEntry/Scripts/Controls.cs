@@ -96,5 +96,15 @@ namespace BarrierToEntry
             get { return !controllerLeft.GetButton(Buttons.TRIGGER) && owner.InGrab; }
         }
 
+        public bool ResetLevel
+        {
+            get { return Input.GetKeyDown(KeyCode.Backspace); }
+        }
+
+        public bool EndGame
+        {
+            get { return Input.GetKeyDown(KeyCode.Escape); }
+        }
+
     }
 }
