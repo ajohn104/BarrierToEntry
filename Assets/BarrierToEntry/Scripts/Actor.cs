@@ -23,6 +23,7 @@ namespace BarrierToEntry
         protected const float MaxMoveSpeed = 5f;
         protected float RotationSpeedHoriz;
         protected const float MaxTurnSpeed = 100f;      // Initial acception. Pending user approval.
+        public bool CanMove = true;
 
         protected Vector3 DominantHandPos;
         public Vector3 domhandpos
@@ -48,7 +49,7 @@ namespace BarrierToEntry
         public GameObject DominantIK;
         public GameObject NonDominantIK;
 
-        protected bool DominantHandAttached = true;
+        public bool DominantHandAttached = true;
         protected bool NonDominantHandAttached = true;
 
         public Vector2 LocalMoveSpeed
@@ -76,6 +77,7 @@ namespace BarrierToEntry
         // Update is called once per frame
         void FixedUpdate()
         {
+            if (!Alive) return;
             _observer.observe();
             Think();
             Act();
@@ -98,11 +100,14 @@ namespace BarrierToEntry
 
         private void Act()
         {
-            
-            anim.SetFloat("Forward", MoveSpeedForward);
-            anim.SetFloat("Strafe", MoveSpeedStrafe);
-            rb.MovePosition(transform.TransformPoint(new Vector3(MoveSpeedStrafe, 0f, MoveSpeedForward) * MaxMoveSpeed * Time.fixedDeltaTime));
-            transform.Rotate(new Vector3(0, RotationSpeedHoriz * MaxTurnSpeed * Time.fixedDeltaTime, 0));        // TODO: Make this better. I think this is geared for a thumbstick
+            if (CanMove)
+            {
+                anim.SetFloat("Forward", MoveSpeedForward);
+                anim.SetFloat("Strafe", MoveSpeedStrafe);
+                rb.MovePosition(transform.TransformPoint(new Vector3(MoveSpeedStrafe, 0f, MoveSpeedForward) * MaxMoveSpeed * Time.fixedDeltaTime));
+                transform.Rotate(new Vector3(0, RotationSpeedHoriz * MaxTurnSpeed * Time.fixedDeltaTime, 0));        // TODO: Make this better. I think this is geared for a thumbstick
+            }
+
             MoveDominantHand();
             MoveNonDominantHand();
         }
@@ -111,7 +116,6 @@ namespace BarrierToEntry
         {
             if (!Alive) return;
             rb.constraints = RigidbodyConstraints.None;
-            rb.useGravity = true;
             rb.angularDrag = 0f;
             anim.enabled = false;
             DisableHand(Hand.Left);

@@ -29,7 +29,7 @@ namespace BarrierToEntry
             _config.GenerateArmLength();
             _config.GenerateHandSize();
 
-            controls = new Controls(device);
+            controls = new Controls(device, this);
             weapon.rb.centerOfMass = weapon.rb.transform.InverseTransformPoint(weapon.saberCoM.position);
             //Physics.IgnoreCollision(collider, weapon.collider);
 
@@ -47,25 +47,18 @@ namespace BarrierToEntry
             CheckChangeBeamColorUp();
             CheckChangeBeamColorDown();
             CheckMovementInput();
+            CheckObjectThrow();
+            CheckGrab();
+            CheckReleaseGrab();
             // CheckStopTime();     // Only necessary for making screenshots easier to produce, really.
         }
         
         protected override void Think()     // TODO: Move control stuff in Player.Think to Controls.cs
         {
             if (!controls.InputCheck()) return;
-            /*CheckRecenter();
-            CheckCalibrateShoulder();
-            CheckCalibrateUserArmLength();
-            CheckChangeBeamColorUp();
-            CheckChangeBeamColorDown();
-            CheckMovementInput();*/
 
             _UpdateDominantHand();
             _UpdateNonDominantHand();
-
-            
-            
-            //if (controls.controllerRight.GetButtonDown(Buttons.TRIGGER)) ModelGenerator.RandomizeModel(this);
         }
 
         public void LateUpdate()
@@ -162,13 +155,98 @@ namespace BarrierToEntry
             }
         }
 
+        public bool InGrab = false;
+        Rigidbody[] heldObjects = new Rigidbody[0];
+
+        private void addRigidBody(Rigidbody body)
+        {
+            Saber attachedWeapon;
+            if (body == this.rb) return;
+            if (body == null) return;
+            if (body.GetComponent<Saber>() != null)
+            {
+                attachedWeapon = body.GetComponent<Saber>();
+                if (attachedWeapon.owner.DominantHandAttached) return;
+            }
+
+            foreach (Rigidbody oldBody in heldObjects)
+            {
+                if (oldBody == body) return;
+            }
+            Rigidbody[] newObjects = new Rigidbody[heldObjects.Length + 1];
+            System.Array.Copy(heldObjects, newObjects, heldObjects.Length);
+            newObjects[heldObjects.Length] = body;
+            heldObjects = newObjects;
+            if (body.GetComponent<Actor>() != null)
+            {
+                body.GetComponent<Actor>().CanMove = false;
+            }
+        }
+
+        private void CheckGrab()
+        {
+            if(controls.Grab)
+            {
+                InGrab = true;
+                RaycastHit[] hits = Physics.SphereCastAll(hand.position, 0.7f, -1 * (hand.transform.rotation * Vector3.forward), Mathf.Infinity, 1, QueryTriggerInteraction.Collide);
+                foreach (RaycastHit hit in hits)
+                {
+                    addRigidBody(hit.rigidbody);
+                }
+            }
+        }
+
+
+        private Vector3 lastHandPos;
+        private void CheckObjectThrow()
+        {
+            if (lastHandPos == null) lastHandPos = hand.localPosition;
+            Vector3 handMovement = hand.localPosition - lastHandPos;
+            if (InGrab)
+            {
+                foreach(Rigidbody body in heldObjects)
+                {
+                    body.useGravity = false;
+                    body.AddForce(handMovement * 20f, ForceMode.VelocityChange);
+                }
+            }
+            lastHandPos = hand.localPosition;
+        }
+
+        private void CheckReleaseGrab()
+        {
+            if (controls.ReleaseGrab)
+            {
+                foreach(Rigidbody body in heldObjects)
+                {
+                    if (body.GetComponent<Saber>() == null) {
+                        body.useGravity = true;
+                        if(body.GetComponent<Actor>() != null)
+                        {
+                            body.GetComponent<Actor>().CanMove = true;
+                        }
+                    } else if(!body.GetComponent<Saber>().owner.DominantHandAttached)
+                    {
+                        body.useGravity = true;
+                    }
+
+                        
+                }
+
+                InGrab = false;
+                heldObjects = new Rigidbody[0];
+            }
+        }
+
         void OnDrawGizmos()
         {
             if (controls == null || !controls.InputCheck()) return;
             Gizmos.color = Color.red;
+            Gizmos.DrawLine(hand.transform.position, hand.transform.position + -6 * (hand.transform.rotation * Vector3.forward));
+            /*Gizmos.color = Color.red;
             Gizmos.DrawLine(weapon.transform.position, weapon.transform.position + weapon.target.up);
 
-            Gizmos.DrawSphere(transform.TransformPoint(controls.controllerRight.Position + _config.rightCalibOffset), 0.01f);
+            Gizmos.DrawSphere(transform.TransformPoint(controls.controllerRight.Position + _config.rightCalibOffset), 0.01f);*/
         }
 
         void OnAnimatorIK()

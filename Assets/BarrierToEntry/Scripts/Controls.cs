@@ -13,6 +13,7 @@ namespace BarrierToEntry
     {
         
         public Device device;
+        public Player owner;
         public Tracker controllerLeft;      // Moved to Controls; used with player input
         public Tracker controllerRight;     // Moved to Controls; used with player input
 
@@ -23,8 +24,9 @@ namespace BarrierToEntry
          * That's not to say that controls shouldn't be customizable.
         */
 
-        public Controls(Device deviceBase)
+        public Controls(Device deviceBase, Player player)
         {
+            this.owner = player;
             this.device = deviceBase;
             InputCheck();
         }
@@ -83,6 +85,16 @@ namespace BarrierToEntry
         {
             get { return controllerRight.GetButtonDown(Buttons.A); }
         }
-        
+
+        public bool Grab
+        {
+            get { return controllerLeft.GetButtonDown(Buttons.TRIGGER); }
+        }
+
+        public bool ReleaseGrab
+        {
+            get { return !controllerLeft.GetButton(Buttons.TRIGGER) && owner.InGrab; }
+        }
+
     }
 }
