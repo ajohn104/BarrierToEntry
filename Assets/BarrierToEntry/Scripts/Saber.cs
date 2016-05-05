@@ -18,6 +18,7 @@ namespace BarrierToEntry
 
         public float rumbleCutoff = 10f;
         public float rumbleRange = 15f;
+        public CollisionHandler collisionHandler;
 
 
         private float _saberErrorDist = 0f;

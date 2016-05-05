@@ -25,6 +25,7 @@ namespace BarrierToEntry
             DecideTarget();
             if (CheckForDanger())
             {
+                Debug.Log("Danger danger!");
                 if (currentTactic == null || (currentTactic.GetType() != typeof(Defensive)))
                 {
                     currentTactic = new Defensive(this.owner);
@@ -32,7 +33,7 @@ namespace BarrierToEntry
             }
             else
             {
-                if (currentTactic == null || (currentTactic.GetType() != typeof(Defensive)))
+                if (currentTactic == null || (currentTactic.GetType() != typeof(Offensive)))
                 {
                     currentTactic = new Offensive(this.owner);
                 }
@@ -68,6 +69,7 @@ namespace BarrierToEntry
                 }
                 //Debug.Log(s2 + " : " + angleSum);
                 //if (angleSum > 50) Debug.Log(angleSum); // In a really basic sense, this could be my danger check. For now. TODO: Make a less dumb dangerCheck
+                if(angleSum > 40) Debug.Log(angleSum);
                 return angleSum > 50;
             }
 
@@ -115,6 +117,10 @@ namespace BarrierToEntry
         private void PerformTactic()
         {
             currentTactic.Perform();
+            if(currentTactic is Offensive && ((Offensive)currentTactic).isDone)
+            {
+                currentTactic = null;
+            }
         }
     }
 }
