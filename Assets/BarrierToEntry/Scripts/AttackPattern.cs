@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System;
 
 namespace BarrierToEntry
@@ -17,22 +16,27 @@ namespace BarrierToEntry
         private float lastTime = 0f;
 
         private static AttackPattern leftRight = new AttackPattern(
-                new Vector3[] { new Vector3(), new Vector3(), new Vector3(), new Vector3(), new Vector3() },
-                new Vector3[] { new Vector3(), new Vector3(), new Vector3(), new Vector3(), new Vector3() }
+                new Vector3[] { new Vector3(-0.4f, 1.4f, 0f), new Vector3(-0.1f, 1.4f, 0.3f), new Vector3(0.4f, 1.2f, 0.2f), new Vector3(0.5f, 1.1f, 0f)},
+                new Vector3[] { new Vector3(337.4f, 135.7f, 306.2f), new Vector3(345.4f, 192.2f, 312.5f), new Vector3(323.6f, 279.6f, 283.3f), new Vector3(310.8f, 347f, 271.8f) }
             );
         private static AttackPattern rightLeft = new AttackPattern(
                 new Vector3[] { new Vector3(0.8f, 1.6f, 0f), new Vector3(0.5f, 1.4f, 0.4f), new Vector3(-0.1f, 1.3f, 0.3f), new Vector3(-0.3f, 1.3f, 0.1f)},
                 new Vector3[] { new Vector3(353.2f, 241.4f, 55.9f), new Vector3(313.3f, 141.1f, 73.9f), new Vector3(298.4f, 65.9f, 76.2f), new Vector3(285f, 174.4f, 245.2f)}
             );
         private static AttackPattern topDown = new AttackPattern(
-                new Vector3[] { new Vector3(0.6f, 1.7f, 0f), new Vector3(0.4f, 1.5f, 0.3f), new Vector3(0.1f, 1.3f, 0.3f), new Vector3(-0.2f, 1.1f, 0.1f) },
-                new Vector3[] { new Vector3(18.2f, 239.9f, 45.9f), new Vector3(315.5f, 172f, 35.1f), new Vector3(284.9f, 101.6f, 78f), new Vector3(324.7f, 354.5f, 147.3f) }
+                new Vector3[] { new Vector3(0.1f, 1.8f, 0.1f), new Vector3(0.1f, 1.4f, 0.3f), new Vector3(-0.1f, 1.1f, 0.2f), new Vector3(-0.1f, 1.1f, -0.1f) },
+                new Vector3[] { new Vector3(59.5f, 186.2f, 17.8f), new Vector3(325.5f, 171f, 6f), new Vector3(258.8f, 1.2f, 176.6f), new Vector3(305.6f, 194.8f, 202.3f) }
             );
 
         private AttackPattern(Vector3[] pos, Vector3[] rot)
         {
             this.positions = pos;
             this.rotations = rot;
+        }
+
+        public static AttackPattern GetPattern(Vector3 initPos, Vector3 initRot)
+        {
+            return GetPattern(UnityEngine.Random.Range(0, 3), initPos, initRot);     // Because of range of LEFT_TO_RIGHT to TOP_DOWN being 0 - 2
         }
 
         public static AttackPattern GetPattern(int direction, Vector3 initPos, Vector3 initRot)

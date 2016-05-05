@@ -22,7 +22,7 @@ namespace BarrierToEntry
         protected float MoveSpeedStrafe;
         protected const float MaxMoveSpeed = 1f;
         protected float RotationSpeedHoriz;
-        protected const float MaxTurnSpeed = 150f;      // Initial acception. Pending user approval.
+        protected const float MaxTurnSpeed = 100f;      // Initial acception. Pending user approval.
 
         protected Vector3 DominantHandPos;
         public Vector3 domhandpos
@@ -93,9 +93,29 @@ namespace BarrierToEntry
 
         public void Die()
         {
+            if (!Alive) return;
+            rb.constraints = RigidbodyConstraints.None;
+            rb.useGravity = true;
+            rb.angularDrag = 0f;
+            anim.enabled = false;
+            DisableHand(Hand.Left);
+            DisableHand(Hand.Right);
+            Ragdoll();
+
             Alive = false;
             Debug.Log("I just died.");
+            
             // TODO: Implement. I'd imagine I'll just ragdoll the body. Or...something.
+        }
+
+        private void Ragdoll()
+        {
+            Collider[] colliders = transform.GetComponentsInChildren<Collider>();
+            foreach (Collider col in colliders)
+            {
+                col.isTrigger = false;
+            }
+            collider.enabled = false;
         }
 
         public void DisableHand(Hand side)
