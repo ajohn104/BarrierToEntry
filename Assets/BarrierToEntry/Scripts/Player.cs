@@ -149,7 +149,7 @@ namespace BarrierToEntry
         void OnAnimatorIK()
         {
             Quaternion computedRot = Quaternion.Euler(DominantIK.transform.rotation.eulerAngles) * Quaternion.Euler(HandGripIKOffset);
-            Quaternion computedRot2 = Quaternion.Euler(hand.rotation.eulerAngles) * Quaternion.Euler(handIKOffset) * transform.rotation;
+            Quaternion computedRot2 = Quaternion.Euler(hand.rotation.eulerAngles) * Quaternion.Euler(handIKOffset);// * transform.rotation;
 
             anim.SetIKPositionWeight(AvatarIKGoal.RightHand, 1.0f);
             anim.SetIKRotationWeight(AvatarIKGoal.RightHand, 1.0f);

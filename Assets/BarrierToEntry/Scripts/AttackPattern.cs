@@ -25,8 +25,8 @@ namespace BarrierToEntry
                 new Vector3[] { new Vector3(353.2f, 241.4f, 55.9f), new Vector3(313.3f, 141.1f, 73.9f), new Vector3(298.4f, 65.9f, 76.2f), new Vector3(285f, 174.4f, 245.2f)}
             );
         private static AttackPattern topDown = new AttackPattern(
-                new Vector3[] { new Vector3(), new Vector3(), new Vector3(), new Vector3(), new Vector3() },
-                new Vector3[] { new Vector3(), new Vector3(), new Vector3(), new Vector3(), new Vector3() }
+                new Vector3[] { new Vector3(0.6f, 1.7f, 0f), new Vector3(0.4f, 1.5f, 0.3f), new Vector3(0.1f, 1.3f, 0.3f), new Vector3(-0.2f, 1.1f, 0.1f) },
+                new Vector3[] { new Vector3(18.2f, 239.9f, 45.9f), new Vector3(315.5f, 172f, 35.1f), new Vector3(284.9f, 101.6f, 78f), new Vector3(324.7f, 354.5f, 147.3f) }
             );
 
         private AttackPattern(Vector3[] pos, Vector3[] rot)

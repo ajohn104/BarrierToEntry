@@ -11,7 +11,7 @@ namespace BarrierToEntry
         {
             this.owner = actor;
             //pattern = AttackPattern.GetPattern(Mathf.FloorToInt(Random.value * 3f), owner.domhandpos, owner.weapon.target.localRotation.eulerAngles);
-            pattern = AttackPattern.GetPattern(AttackPattern.RIGHT_TO_LEFT, owner.domhandpos, owner.weapon.target.localRotation.eulerAngles); // Using this for now since others aren't done
+            pattern = AttackPattern.GetPattern(AttackPattern.TOP_DOWN, owner.domhandpos, owner.weapon.target.localRotation.eulerAngles); // Using this for now since others aren't done
         }
 
         public bool Update()
