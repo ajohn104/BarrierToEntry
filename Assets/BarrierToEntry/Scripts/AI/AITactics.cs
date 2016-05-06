@@ -105,18 +105,9 @@ namespace BarrierToEntry
                 return;
             }
             Actor[] enemies = owner.enemyTeam.members;
-            currentTarget = currentTarget ?? enemies[0];        // Doesn't deal with dead enemies, obv. TODO: Needs to.
+
+            currentTarget = owner.FindClosestEnemy() ?? enemies[0];
             float closest = DistanceTo(currentTarget);
-            
-            foreach (Actor enemy in enemies)
-            {
-                float dist = DistanceTo(enemy);
-                if (dist < closest)
-                {
-                    closest = dist;
-                    currentTarget = enemy; 
-                }
-            }
         }
 
         /// <summary>

@@ -98,7 +98,7 @@ namespace BarrierToEntry
 
         public bool ResetLevel
         {
-            get { return Input.GetKeyDown(KeyCode.Backspace); }
+            get { return controllerLeft.GetButtonDown(Buttons.START); }
         }
 
         public bool EndGame

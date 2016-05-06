@@ -17,6 +17,8 @@ namespace BarrierToEntry {
             team2.enemyTeam = team1;
             team1.SetAsMembers(team1Members);
             team2.SetAsMembers(team2Members);
+            team1.SetTeamColor(ModelGenerator.BEAM_YODA);
+            team2.SetTeamColor(ModelGenerator.BEAM_RED);
         }
     }
 }

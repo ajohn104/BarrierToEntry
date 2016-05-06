@@ -203,7 +203,7 @@ namespace BarrierToEntry
             throw new NotSupportedException("TODO: Implement Actor.Move better than Actor.Act does that meshes well with it");
         }
 
-        protected Actor FindClosestEnemy()
+        public Actor FindClosestEnemy()
         {
             if (enemyTeam.members.Length == 0) return null;
             Actor closest = enemyTeam.members[0];
@@ -211,13 +211,13 @@ namespace BarrierToEntry
             foreach(Actor enemy in enemyTeam.members)
             {
                 float dist = Vector3.Distance(enemy.transform.position, this.transform.position);
-                if (dist < closestDist)
+                if (dist < closestDist && enemy.Alive)
                 {
                     closest = enemy;
                     closestDist = dist;
                 }
             }
-            return closest;
+            return closest.Alive?closest:null;
         }
 
         public static float Distance(Actor a, Actor b)

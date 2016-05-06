@@ -79,5 +79,14 @@ namespace BarrierToEntry
             actor.team = NONE;
             actor.enemyTeam = NONE;
         }
+
+        public void SetTeamColor(Color col)
+        {
+            foreach (Actor actor in members)
+            {
+                actor.modelDesign.Prepare();
+                actor.modelDesign.SetColor(BodyPart.BEAM, col);
+            }
+        }
     }
 }

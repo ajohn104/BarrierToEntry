@@ -24,7 +24,7 @@ namespace BarrierToEntry
             weapon.rb.centerOfMass = weapon.rb.transform.InverseTransformPoint(weapon.saberCoM.position);
             Physics.IgnoreCollision(collider, weapon.collider);
             modelDesign.Prepare();
-            ModelGenerator.RandomizeModel(this);
+            //ModelGenerator.RandomizeModel(this);
             tactics = new AITactics(this);
             _observer = new Observer(this);
             DominantIK = weapon.gameObject;

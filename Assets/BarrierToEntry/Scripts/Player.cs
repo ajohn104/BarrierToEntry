@@ -192,7 +192,8 @@ namespace BarrierToEntry
             if(controls.Grab)
             {
                 InGrab = true;
-                RaycastHit[] hits = Physics.SphereCastAll(hand.position, 0.7f, -1 * (hand.transform.rotation * Vector3.forward), Mathf.Infinity, 1, QueryTriggerInteraction.Collide);
+                //RaycastHit[] hits = Physics.SphereCastAll(hand.position, 0.7f, -1 * (hand.transform.rotation * Vector3.forward), Mathf.Infinity, 1, QueryTriggerInteraction.Collide);
+                RaycastHit[] hits = Physics.SphereCastAll(hand.position, 5f, (hand.transform.up), Mathf.Infinity, 1, QueryTriggerInteraction.Collide);
                 foreach (RaycastHit hit in hits)
                 {
                     addRigidBody(hit.rigidbody);
@@ -211,7 +212,9 @@ namespace BarrierToEntry
                 foreach(Rigidbody body in heldObjects)
                 {
                     body.useGravity = false;
-                    body.AddForce(handMovement * 20f, ForceMode.VelocityChange);
+                    //body.AddForce(handMovement * 20f, ForceMode.VelocityChange);
+                    //body.MovePosition(body.position + handMovement * 20f);
+                    body.velocity = transform.rotation * handMovement * 600f; // Quaternion.Inverse(hand.transform.rotation)
                 }
             }
             lastHandPos = hand.localPosition;
@@ -246,7 +249,7 @@ namespace BarrierToEntry
         {
             if(controls.ResetLevel)
             {
-                UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+                Application.LoadLevel(0);
             }
         }
 
