@@ -24,7 +24,7 @@ namespace BarrierToEntry
             if (!RagdollSpawner.DebugEnabled)
             {
                 if (otherWeapon == null) { return; }
-                if (Team.isSameTeam(UpperArm.owner, otherWeapon.owner)) { return; }
+                if (Team.isSameTeam(UpperArm.owner, otherWeapon.owner) || UpperArm.owner == otherWeapon.owner) { return; }
             }
             else
             {

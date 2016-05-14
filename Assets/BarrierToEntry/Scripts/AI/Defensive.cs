@@ -40,6 +40,7 @@ namespace BarrierToEntry
             owner.domhandpos = enemy.domhandpos;    // Tracks enemy for testing purposes. Will change when I get the math right.
 
             float oldZ = owner.weapon.target.localEulerAngles.z;
+            if (enemy.observer == null) return;
             owner.weapon.target.localRotation = Quaternion.Inverse(owner.transform.rotation)*enemy.observer.IdealBlockRotation;//enemy.weapon.target.transform.localRotation;
             Vector3 centerBeamPosFar = enemy.observer.IdealBlockPosition;
             Vector3 shoulderOffset = centerBeamPosFar - owner.anim.GetBoneTransform(HumanBodyBones.RightUpperArm).position;

@@ -86,6 +86,7 @@ namespace BarrierToEntry
             {
                 actor.modelDesign.Prepare();
                 actor.modelDesign.SetColor(BodyPart.BEAM, col);
+                actor.modelDesign.LockIn();
             }
         }
     }

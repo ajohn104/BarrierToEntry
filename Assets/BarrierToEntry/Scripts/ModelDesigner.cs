@@ -19,8 +19,12 @@ namespace BarrierToEntry {
         private Material equipment;
         private Material beam;
         private Material beamCap;
+        private bool LockedIn = false;
 
-        
+        public void LockIn(bool Locked = true)
+        {
+            LockedIn = Locked;
+        }
 
         public void Prepare() {
             Material[] mats = bodyRenderer.materials;
@@ -83,6 +87,7 @@ namespace BarrierToEntry {
         {
             if (part == BodyPart.BEAM)
             {
+                if (LockedIn) return;
                 float hue = 0f;
                 float sat = 0f;
                 float val = 0f;

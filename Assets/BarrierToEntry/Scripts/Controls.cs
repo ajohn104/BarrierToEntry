@@ -106,5 +106,10 @@ namespace BarrierToEntry
             get { return Input.GetKeyDown(KeyCode.Escape); }
         }
 
+        public bool DisplayPointer
+        {
+            get { return controllerRight.GetButton(Buttons.START); }
+        }
+
     }
 }

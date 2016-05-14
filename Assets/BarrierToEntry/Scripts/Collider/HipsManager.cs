@@ -20,7 +20,7 @@ namespace BarrierToEntry {
             if (!RagdollSpawner.DebugEnabled)
             {
                 if (otherWeapon == null) { return; }
-                if (Team.isSameTeam(owner, otherWeapon.owner)) { return; }
+                if (Team.isSameTeam(owner, otherWeapon.owner) || owner == otherWeapon.owner) { return; }
             } else
             {
                 if (otherWeapon != null) { return; }

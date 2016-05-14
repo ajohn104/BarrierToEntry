@@ -12,6 +12,7 @@ namespace BarrierToEntry
 
         public Controls controls;
         public Device device;
+        public GameObject pointer;
 
         private PlayerConfig _config;
         public override ActorConfig config
@@ -53,6 +54,7 @@ namespace BarrierToEntry
             CheckReleaseGrab();
             CheckResetLevel();
             CheckEndGame();
+            CheckDisplayPointer();
             // CheckStopTime();     // Only necessary for making screenshots easier to produce, really.
         }
         
@@ -108,6 +110,8 @@ namespace BarrierToEntry
         {
             this.NonDominantHandPos = controls.controllerLeft.Position + _config.leftCalibOffset;
             this.NonDominantHandRot = controls.controllerLeft.Rotation * Quaternion.Euler(weapon.HandRotOffset);
+
+            this.NonDominantHandRot *= Quaternion.Euler(new Vector3(0, -20, 0));
         }
 
         protected void CheckMovementInput()
@@ -124,6 +128,7 @@ namespace BarrierToEntry
         {
             if(controls.ChangeBeamColorUp)
             {
+                this.modelDesign.LockIn(false);
                 currentSaberColor++;
                 currentSaberColor %= ModelGenerator.beamColors.Length;
                 modelDesign.SetColor(BodyPart.BEAM, ModelGenerator.beamColors[currentSaberColor]);
@@ -134,10 +139,16 @@ namespace BarrierToEntry
         {
             if (controls.ChangeBeamColorDown)
             {
+                this.modelDesign.LockIn(false);
                 currentSaberColor--;
                 if(currentSaberColor < 0) { currentSaberColor = ModelGenerator.beamColors.Length - 1; }
                 modelDesign.SetColor(BodyPart.BEAM, ModelGenerator.beamColors[currentSaberColor]);
             }
+        }
+
+        private void CheckDisplayPointer()
+        {
+            pointer.SetActive(controls.DisplayPointer);
         }
 
         private void CheckDisplaySaberTransform()
